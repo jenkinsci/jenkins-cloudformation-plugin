@@ -4,17 +4,41 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.jvnet.hudson.plugins</groupId>
-        <artifactId>hudson-plugin-parent</artifactId>
-        <version>2.0.1</version><!-- which version of Hudson is this plugin built against? -->
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>1.414</version>
     </parent>
-
-    <groupId>com.syncapse.jenkins-ci.plugins</groupId>
-    <artifactId>jenkins-cloudformation-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
 
     <packaging>hpi</packaging>
 
-    <name>MyNewPlugin</name>
+    <groupId>com.syncapse.jenkinsci.plugins</groupId>
+    <artifactId>jenkins-cloudformation-plugin</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    
+    <licenses>
+        <license>
+            <name>MIT license</name>
+            <comments>All source code is under the MIT license.</comments>
+        </license>
+    </licenses>
+    
+    <developers>
+        <developer>
+            <id>edovale</id>
+            <name>Erick Dovale</name>
+            <email>e.dovale@syncapse.com</email>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
+
+    <name>jenkins-cloudformation-plugin</name>
+    
+    <dependencies>
+    	<dependency>
+    		<groupId>org.slf4j</groupId>
+    		<artifactId>slf4j-simple</artifactId>
+    		<version>1.5.10</version>
+    	</dependency>
+    </dependencies>
 
 </project>
