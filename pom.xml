@@ -1,44 +1,70 @@
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <version>1.414</version>
-    </parent>
+	<modelVersion>4.0.0</modelVersion>
 
-    <packaging>hpi</packaging>
+	<parent>
+		<groupId>org.jenkins-ci.plugins</groupId>
+		<artifactId>plugin</artifactId>
+		<version>1.414</version>
+	</parent>
 
-    <groupId>com.syncapse.jenkinsci.plugins</groupId>
-    <artifactId>jenkins-cloudformation-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    
-    <licenses>
-        <license>
-            <name>MIT license</name>
-            <comments>All source code is under the MIT license.</comments>
-        </license>
-    </licenses>
-    
-    <developers>
-        <developer>
-            <id>edovale</id>
-            <name>Erick Dovale</name>
-            <email>e.dovale@syncapse.com</email>
-            <timezone>-5</timezone>
-        </developer>
-    </developers>
+	<packaging>hpi</packaging>
 
-    <name>jenkins-cloudformation-plugin</name>
-    
-    <dependencies>
-    	<dependency>
-    		<groupId>com.amazonaws</groupId>
-    		<artifactId>aws-java-sdk</artifactId>
-    		<version>1.2.2</version>
-    	</dependency>
-    </dependencies>
+	<groupId>com.syncapse.jenkinsci.plugins</groupId>
+	<artifactId>jenkins-cloudformation-plugin</artifactId>
+	<version>1.0-SNAPSHOT</version>
 
+	<licenses>
+		<license>
+			<name>MIT license</name>
+			<comments>All source code is under the MIT license.</comments>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>edovale</id>
+			<name>Erick Dovale</name>
+			<email>e.dovale@syncapse.com</email>
+			<timezone>-5</timezone>
+		</developer>
+	</developers>
+
+	<name>jenkins-cloudformation-plugin</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk</artifactId>
+			<version>1.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.8.0</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.4</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<testSourceDirectory>src/test/java</testSourceDirectory>
+		<testOutputDirectory>${project.build.directory}/test-classes</testOutputDirectory>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+			</testResource>
+		</testResources>
+	</build>
 </project>
