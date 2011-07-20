@@ -1,0 +1,47 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": "Syncapse Shared Services Stack Platform Recipe",
+
+  "Resources": {
+
+	    "Ec2Instance" : {
+	      "Type" : "AWS::EC2::Instance",
+	      "Properties" : {
+	        "SecurityGroups" : [ { "Ref" : "InstanceSecurityGroup" } ],
+	        "KeyName" : "platform-keypair",
+	        "ImageId" : "ami-aa0df2c3"
+	      }
+	    },
+	
+	    "InstanceSecurityGroup" : {
+	      "Type" : "AWS::EC2::SecurityGroup",
+	      "Properties" : {
+	        "GroupDescription" : "Enable SSH access via port 22",
+	        "SecurityGroupIngress" : [ {
+	          "IpProtocol" : "tcp",
+	          "FromPort" : "22",
+	          "ToPort" : "22",
+	          "CidrIp" : "0.0.0.0/0"
+	        } ]
+	      }
+	    }
+	    
+  },
+
+  "Outputs" : {
+    "InstanceId" : {
+      "Description" : "InstanceId of the newly created EC2 instance",
+      "Value" : { "Ref" : "Ec2Instance" }
+    },
+    "AZ" : {
+      "Description" : "Availability Zone of the newly created EC2 instance",
+      "Value" : { "Fn::GetAtt" : [ "Ec2Instance", "AvailabilityZone" ] }
+    },
+    "PublicIP" : {
+      "Description" : "Public IP address of the newly created EC2 instance",
+      "Value" : { "Fn::GetAtt" : [ "Ec2Instance", "PublicIp" ] }
+    }
+  }
+  
+}

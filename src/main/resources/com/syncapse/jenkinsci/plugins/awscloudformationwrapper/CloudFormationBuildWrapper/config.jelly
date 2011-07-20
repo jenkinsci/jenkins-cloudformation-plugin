@@ -1,0 +1,32 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+		 xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+		 
+	<f:entry title="Stack name" field="stackName">
+		<f:textbox />
+	</f:entry>
+
+	<f:entry title="${%Build step description}" field="description">
+		<f:expandableTextbox />
+	</f:entry>
+
+	<f:entry title="Cloud Formation recipe file. (.json)" field="cloudFormationRecipe">
+		<f:textbox />
+	</f:entry>
+
+	<f:entry title="Cloud Formation parameters" field="parameters">
+		<f:textbox />
+	</f:entry>
+
+	<f:entry title="Timeout (seconds)" field="timeout">
+		<f:textbox />
+	</f:entry>
+
+	<f:entry title="AWS Access Key" field="awsAccessKey">
+		<f:textbox />
+	</f:entry>
+	
+	<f:entry title="AWS Secret Key" field="awsSecretKey">
+		<f:textbox />
+	</f:entry>
+	
+</j:jelly>

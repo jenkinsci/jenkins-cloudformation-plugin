@@ -4,5 +4,5 @@
   Since we don't really have anything dynamic here, let's just use static HTML. 
 -->
 <div>
-  This plugin is a sample plugin to explain how to write a Hudson plugin.
+  Adds a build wrapper that can spawn an AWS Cloud Formation recipe at the start of the build and take it down at the end.
 </div>
