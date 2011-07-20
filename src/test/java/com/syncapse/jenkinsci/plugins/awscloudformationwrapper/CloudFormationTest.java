@@ -17,6 +17,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
+import com.amazonaws.services.cloudformation.model.DescribeStackEventsRequest;
+import com.amazonaws.services.cloudformation.model.DescribeStackEventsResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.amazonaws.services.cloudformation.model.Stack;
@@ -35,7 +37,7 @@ public class CloudFormationTest {
 	@Before
 	public void setup() throws Exception{
 		
-		cf = new CloudFormation(System.out, "testStack", cloudFormationRecipe, parameters, 1, awsAccessKey, awsSecretKey){
+		cf = new CloudFormation(System.out, "testStack", cloudFormationRecipe, parameters, 200, awsAccessKey, awsSecretKey){
 			@Override
 			protected AmazonCloudFormation getAWSClient(){
 				return awsClient;
@@ -43,6 +45,7 @@ public class CloudFormationTest {
 		};
 
 		when(awsClient.createStack(any(CreateStackRequest.class))).thenReturn(createResultWithId("testStack"));
+		when(awsClient.describeStackEvents(any(DescribeStackEventsRequest.class))).thenReturn(new DescribeStackEventsResult());
 		
 	}
 
