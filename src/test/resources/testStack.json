@@ -10,7 +10,7 @@
 	      "Properties" : {
 	        "SecurityGroups" : [ { "Ref" : "InstanceSecurityGroup" } ],
 	        "KeyName" : "platform-keypair",
-	        "ImageId" : "ami-aa0df2c3"
+	        "ImageId" : "ami-76f0061f"
 	      }
 	    },
 	
