@@ -5,6 +5,7 @@ package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -174,8 +175,11 @@ public class CloudFormation {
 		r.withStackName(stackName);
 		DescribeStackEventsResult describeStackEvents = amazonClient.describeStackEvents(r);
 		
-		for (StackEvent event : describeStackEvents.getStackEvents()) {
-			logger.println(event.getEventId() + " - " + event.getResourceStatus() + " - " + event.getResourceStatusReason());
+		List<StackEvent> stackEvents = describeStackEvents.getStackEvents();
+		Collections.reverse(stackEvents);
+		
+		for (StackEvent event : stackEvents) {
+			logger.println(event.getEventId() + " - " + event.getResourceType() + " - " + event.getResourceStatus() + " - " + event.getResourceStatusReason());
 		}
 		
 	}
