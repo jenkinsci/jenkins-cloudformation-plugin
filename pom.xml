@@ -70,8 +70,8 @@
 	</build>
 
 	<scm>
-		<connection>scm:git:git://github.com:jenkinsci/jenkins-cloudformation-plugin.git</connection>
-		<developerConnection>scm:git:git://github.com:jenkinsci/jenkins-cloudformation-plugin.git</developerConnection>
+		<connection>scm:git:git@github.com:jenkinsci/jenkins-cloudformation-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:jenkinsci/jenkins-cloudformation-plugin.git</developerConnection>
 		<url>https://github.com/jenkinsci/jenkins-cloudformation-plugin</url>
 	</scm>
 	
