@@ -12,7 +12,6 @@
 
 	<packaging>hpi</packaging>
 
-	<groupId>com.syncapse.jenkinsci.plugins</groupId>
 	<artifactId>jenkins-cloudformation-plugin</artifactId>
 	<version>0.1-SNAPSHOT</version>
 
