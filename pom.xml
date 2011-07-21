@@ -14,7 +14,7 @@
 
 	<groupId>com.syncapse.jenkinsci.plugins</groupId>
 	<artifactId>jenkins-cloudformation-plugin</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.1-SNAPSHOT</version>
 
 	<licenses>
 		<license>
