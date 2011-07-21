@@ -67,4 +67,11 @@
 			</testResource>
 		</testResources>
 	</build>
+
+	<scm>
+		<connection>scm:git:ssh://github.com/Syncapse/jenkins-cloudformation-plugin.git</connection>
+		<developerConnection>scm:git:ssh://github.com/Syncapse/jenkins-cloudformation-plugin.git</developerConnection>
+		<url>https://github.com/jenkinsci/jenkins-cloudformation-plugin</url>
+	</scm>
+	
 </project>
