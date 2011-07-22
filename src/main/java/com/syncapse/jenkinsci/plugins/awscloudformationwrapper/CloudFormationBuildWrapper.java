@@ -69,7 +69,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	 */
 	private final String awsSecretKey;
 
-	private Map<String, String> parsedParameters;
+	protected Map<String, String> parsedParameters;
 
 	@DataBoundConstructor
 	public CloudFormationBuildWrapper(String stackName, String description,
