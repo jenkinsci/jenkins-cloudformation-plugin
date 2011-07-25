@@ -1,6 +1,7 @@
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,15 +54,15 @@ public class CloudFormationTest {
 	public void cloudFormationCreate_Wait_for_Stack_To_Be_Created() throws Exception{
 
 		when(awsClient.describeStacks(any(DescribeStacksRequest.class))).thenReturn(stackPendingResult(), stackPendingResult(), stackCompletedResult());
-		cf.create();
+		assertTrue(cf.create());
 		verify(awsClient, times(3)).describeStacks(any(DescribeStacksRequest.class));
 
 	}
 	
 	@Test
-	public void create_returns_null_when_stack_creation_fails() throws Exception {
+	public void create_returns_false_when_stack_creation_fails() throws Exception {
 		when(awsClient.describeStacks(any(DescribeStacksRequest.class))).thenReturn(stackFailedResult());
-		assertNull(cf.create());
+		assertFalse(cf.create());
 	}
 	
 	@Test

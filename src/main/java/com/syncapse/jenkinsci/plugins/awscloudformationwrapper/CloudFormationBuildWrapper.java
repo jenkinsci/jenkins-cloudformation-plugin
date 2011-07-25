@@ -11,7 +11,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
-import hudson.util.FormValidation;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -22,9 +21,6 @@ import java.util.Map;
 
 import net.sf.json.JSONObject;
 
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 /**
