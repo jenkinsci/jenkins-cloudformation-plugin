@@ -3,12 +3,21 @@
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
+import hudson.model.AbstractDescribableImpl;
+import hudson.model.AbstractProject;
+import hudson.model.Descriptor;
+import hudson.util.FormValidation;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentials;
@@ -33,6 +42,12 @@ import com.google.common.collect.Lists;
  * 
  */
 public class CloudFormation {
+	
+	/**
+	 * Minimum time to wait before considering the creation of the stack a failure. 
+	 * Default value is 5 minutes. (300 seconds)
+	 */
+	private static final long MIN_TIMEOUT = 300;
 
 	private String stackName;
 	private String recipe;
@@ -45,6 +60,8 @@ public class CloudFormation {
 	private Stack stack;
 	private long waitBetweenAttempts;
 
+	private Map<String, String> outputs;
+
 	public CloudFormation(PrintStream logger, String stackName,
 			String cloudFormationRecipe, Map<String, String> parameters,
 			long timeout, String awsAccessKey, String awsSecretKey) {
@@ -54,13 +71,15 @@ public class CloudFormation {
 		this.parameters = parameters(parameters);
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
-		this.timeout = timeout;
+		this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
 		this.logger = logger;
 		this.amazonClient = getAWSClient();
 		
 		this.waitBetweenAttempts = 10; // query every 10s
-		
-		
+	}
+	
+	public CloudFormation(PrintStream logger, StackBean stackBean){
+		this(logger, stackBean.getStackName(), stackBean.getCloudFormationRecipe(), stackBean.getParsedParameters(), stackBean.getTimeout(), stackBean.getAwsAccessKey(), stackBean.getAwsSecretKey());
 	}
 	
 	private List<Parameter> parameters(Map<String, String> parameters) {
@@ -104,7 +123,7 @@ public class CloudFormation {
 	 * 
 	 * @throws IOException
 	 */
-	public Map<String, String> create() throws IOException {
+	public boolean create() throws IOException {
 
 		logger.println("Creating Cloud Formation stack: " + stackName);
 		
@@ -125,14 +144,15 @@ public class CloudFormation {
 				
 				logger.println("Successfully created stack: " + stackName);
 				
-				return stackOutput;
+				this.outputs = stackOutput;
+				return true;
 			} else{
 				logger.println("Failed to create stack: " + stackName + ". Reason: " + stack.getStackStatusReason());
-				return null;
+				return false;
 			}
 		} catch (AmazonClientException e) {
 			logger.println("Failed to create stack: " + stackName + ". Reason: " + e.getLocalizedMessage());
-			return null;
+			return false;
 		}
 
 	}
@@ -233,4 +253,8 @@ public class CloudFormation {
 		return r;
 	}
 
+	public Map<String, String> getOutputs() {
+		return new HashMap<String, String>(outputs);
+	}
+	
 }
