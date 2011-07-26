@@ -9,7 +9,6 @@
 			<table width="100%">
 				<tr>
 					<td>
-				${h.class.className}
 						<f:entry title="Cloud Formation recipe file. (.json)" >
 							<f:textbox name="stack.stack.cloudFormationRecipe" value="${stack.CloudFormationRecipe}"/>
 						</f:entry>
