@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
@@ -28,26 +29,30 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudFormationTest {
 	
+	private static final String TEST_STACK = "testStack";
+
 	private CloudFormation cf;	// SUT
-	private String cloudFormationRecipe;
-	private Map<String, String> parameters;
+	
+	private String recipeBody = "recipe body";
+	private Map<String, String> parameters = new HashMap<String, String>();
 	private String awsAccessKey = "accessKey";
 	private String awsSecretKey = "secretKey";
-	@Mock protected AmazonCloudFormation awsClient;
-
+	
+	@Mock private AmazonCloudFormation awsClient;
+	
 	@Before
 	public void setup() throws Exception{
 		
-		cf = new CloudFormation(System.out, "testStack", cloudFormationRecipe, parameters, 200, awsAccessKey, awsSecretKey){
+		cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters, 0, awsAccessKey, awsSecretKey){
 			@Override
 			protected AmazonCloudFormation getAWSClient(){
 				return awsClient;
 			}
 		};
 
-		when(awsClient.createStack(any(CreateStackRequest.class))).thenReturn(createResultWithId("testStack"));
+		when(awsClient.createStack(any(CreateStackRequest.class))).thenReturn(createResultWithId(TEST_STACK));
 		when(awsClient.describeStackEvents(any(DescribeStackEventsRequest.class))).thenReturn(new DescribeStackEventsResult());
-		
+
 	}
 
 	@Test
@@ -97,7 +102,7 @@ public class CloudFormationTest {
 	}
 
 	private DescribeStacksResult describeStacksResultWithStatus(StackStatus status) {
-		return new DescribeStacksResult().withStacks(new Stack().withStackStatus(status.name()).withStackName("testStack"));
+		return new DescribeStacksResult().withStacks(new Stack().withStackStatus(status.name()).withStackName(TEST_STACK));
 	}
 
 }

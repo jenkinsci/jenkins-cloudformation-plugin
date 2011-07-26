@@ -125,7 +125,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		}
 		
         public FormValidation doCheckStackName(
-				@AncestorInPath AbstractProject project,
+				@AncestorInPath AbstractProject<?, ?> project,
 				@QueryParameter String value) throws IOException {
 			if (0 == value.length()) {
 				return FormValidation.error("Empty stack name");
@@ -134,11 +134,11 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		}
 
 		public FormValidation doCheckTimeout(
-				@AncestorInPath AbstractProject project,
+				@AncestorInPath AbstractProject<?, ?> project,
 				@QueryParameter String value) throws IOException {
 			if (value.length() > 0) {
 				try {
-					long time = Long.parseLong(value);
+					Long.parseLong(value);
 				} catch (NumberFormatException e) {
 					return FormValidation.error("Timeout value "+ value + " is not a number.");
 				}
@@ -147,7 +147,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		}
 
 		public FormValidation doCheckCloudFormationRecipe(
-				@AncestorInPath AbstractProject project,
+				@AncestorInPath AbstractProject<?, ?> project,
 				@QueryParameter String value) throws IOException {
 			if (0 == value.length()) {
 				return FormValidation.error("Empty recipe file.");
@@ -156,7 +156,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		}
 
 		public FormValidation doCheckAwsAccessKey(
-				@AncestorInPath AbstractProject project,
+				@AncestorInPath AbstractProject<?, ?> project,
 				@QueryParameter String value) throws IOException {
 			if (0 == value.length()) {
 				return FormValidation.error("Empty aws access key");
@@ -165,7 +165,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		}
 
 		public FormValidation doCheckAwsSecretKey(
-				@AncestorInPath AbstractProject project,
+				@AncestorInPath AbstractProject<?, ?> project,
 				@QueryParameter String value) throws IOException {
 			if (0 == value.length()) {
 				return FormValidation.error("Empty aws secret key");

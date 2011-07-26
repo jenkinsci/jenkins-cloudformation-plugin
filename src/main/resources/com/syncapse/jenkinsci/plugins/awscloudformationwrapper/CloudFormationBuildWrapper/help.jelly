@@ -1,0 +1,7 @@
+<div>
+Creates <a href="http://aws.amazon.com/cloudformation/">AWS CloudFormation</a> stacks before the build and deletes them after the build.<br/>
+The outputs of the cloudformation are exported as environment variables.
+Environment variable names will be prefixed with the stack name parameter.
+Amazon enforces the stack name to be unique in the same account so this way we guarantee there will be no collisions between several runs of the same stack.
+You can reference them from other steps in the build by using: $[stack name]_[output name].
+</div>

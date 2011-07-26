@@ -30,7 +30,7 @@ import org.kohsuke.stapler.StaplerRequest;
 public class CloudFormationBuildWrapper extends BuildWrapper {
 
 	protected List<StackBean> stacks;
-	
+
 	public CloudFormationBuildWrapper(List<StackBean> stackBeans) {
 		this.stacks = stackBeans;
 	}
@@ -38,36 +38,36 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	@Override
 	public Environment setUp(AbstractBuild build, Launcher launcher,
 			BuildListener listener) throws IOException, InterruptedException {
-		
+
 		final List<CloudFormation> cloudFormations = new ArrayList<CloudFormation>();
-		final Map<String, String> stackOutputs =  new HashMap<String, String>();
-		
+		final Map<String, String> stackOutputs = new HashMap<String, String>();
+
 		for (StackBean stackBean : stacks) {
 
-			final CloudFormation cloudFormation = newCloudFormation(stackBean, build, listener.getLogger());
-			
-			if (cloudFormation.create()){
+			final CloudFormation cloudFormation = newCloudFormation(stackBean,
+					build, listener.getLogger());
+
+			if (cloudFormation.create()) {
 				cloudFormations.add(cloudFormation);
 				stackOutputs.putAll(cloudFormation.getOutputs());
-			} else{
+			} else {
 				build.setResult(Result.FAILURE);
 				return null;
 			}
 
 		}
 
-
 		return new Environment() {
 			@Override
 			public boolean tearDown(AbstractBuild build, BuildListener listener)
 					throws IOException, InterruptedException {
-				
+
 				boolean result = true;
-				
+
 				for (CloudFormation cf : cloudFormations) {
 					result = result && cf.delete();
 				}
-				
+
 				return result;
 
 			}
@@ -79,27 +79,31 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 		};
 	}
 
-	protected CloudFormation newCloudFormation(StackBean stackBean, AbstractBuild build,
-			PrintStream logger) throws IOException {
-		return new CloudFormation(logger, stackBean);
+	protected CloudFormation newCloudFormation(StackBean stackBean,
+			AbstractBuild<?, ?> build, PrintStream logger) throws IOException {
+
+		return new CloudFormation(logger, stackBean.getStackName(), build
+				.getWorkspace().child(stackBean.getCloudFormationRecipe())
+				.readToString(), stackBean.getParsedParameters(),
+				stackBean.getTimeout(), stackBean.getAwsAccessKey(),
+				stackBean.getAwsSecretKey());
+		
 	}
 
-	private String cloudFormationRecipe(StackBean stackBean, AbstractBuild build) throws IOException {
-		return build.getWorkspace().child(stackBean.getCloudFormationRecipe()).readToString();
-	}
-	
 	@Extension
 	public static class DescriptorImpl extends BuildWrapperDescriptor {
-		
+
 		public DescriptorImpl() {
 			super(CloudFormationBuildWrapper.class);
 		}
 
-        @Override
-        public BuildWrapper newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            List<StackBean> stacks = req.bindParametersToList(StackBean.class, "stack.stack.");
-            return new CloudFormationBuildWrapper(stacks);
-        }
+		@Override
+		public BuildWrapper newInstance(StaplerRequest req,
+				final JSONObject formData) throws FormException {
+			List<StackBean> stacks = req.bindParametersToList(StackBean.class,
+					"stack.stack.");
+			return new CloudFormationBuildWrapper(stacks);
+		}
 
 		@Override
 		public String getDisplayName() {

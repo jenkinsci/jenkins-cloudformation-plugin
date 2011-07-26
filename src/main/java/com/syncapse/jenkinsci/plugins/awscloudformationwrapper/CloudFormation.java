@@ -3,21 +3,12 @@
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
-import hudson.model.AbstractDescribableImpl;
-import hudson.model.AbstractProject;
-import hudson.model.Descriptor;
-import hudson.util.FormValidation;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentials;
@@ -63,11 +54,11 @@ public class CloudFormation {
 	private Map<String, String> outputs;
 
 	public CloudFormation(PrintStream logger, String stackName,
-			String cloudFormationRecipe, Map<String, String> parameters,
+			String recipeBody, Map<String, String> parameters,
 			long timeout, String awsAccessKey, String awsSecretKey) {
 
 		this.stackName = stackName;
-		this.recipe = cloudFormationRecipe;
+		this.recipe = recipeBody;
 		this.parameters = parameters(parameters);
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
@@ -78,29 +69,6 @@ public class CloudFormation {
 		this.waitBetweenAttempts = 10; // query every 10s
 	}
 	
-	public CloudFormation(PrintStream logger, StackBean stackBean){
-		this(logger, stackBean.getStackName(), stackBean.getCloudFormationRecipe(), stackBean.getParsedParameters(), stackBean.getTimeout(), stackBean.getAwsAccessKey(), stackBean.getAwsSecretKey());
-	}
-	
-	private List<Parameter> parameters(Map<String, String> parameters) {
-
-		if (parameters == null || parameters.values().size() == 0) {
-			return null;
-		}
-
-		List<Parameter> result = Lists.newArrayList();
-		Parameter parameter = null;
-		for (String name : parameters.keySet()) {
-			parameter = new Parameter();
-			parameter.setParameterKey(name);
-			parameter.setParameterValue(parameters.get(name));
-			result.add(parameter);
-		}
-
-		return result;
-	}
-
-
 	/**
 	 * @return
 	 */
@@ -172,6 +140,24 @@ public class CloudFormation {
 			deleted = (stack == null);
 			if (!deleted) sleep();
 		}
+	}
+
+	private List<Parameter> parameters(Map<String, String> parameters) {
+	
+		if (parameters == null || parameters.values().size() == 0) {
+			return null;
+		}
+	
+		List<Parameter> result = Lists.newArrayList();
+		Parameter parameter = null;
+		for (String name : parameters.keySet()) {
+			parameter = new Parameter();
+			parameter.setParameterKey(name);
+			parameter.setParameterValue(parameters.get(name));
+			result.add(parameter);
+		}
+	
+		return result;
 	}
 
 	private Stack waitForStackToBeCreated() {
@@ -247,14 +233,18 @@ public class CloudFormation {
 		CreateStackRequest r = new CreateStackRequest();
 		r.withStackName(stackName);
 		r.withParameters(parameters);
-
 		r.withTemplateBody(recipe);
 
 		return r;
 	}
 
 	public Map<String, String> getOutputs() {
-		return new HashMap<String, String>(outputs);
+		// Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
+		HashMap<String, String> map = new HashMap<String, String>();
+		for (String key : outputs.keySet()) {
+			map.put(stackName + "_" + key, outputs.get(key));
+		}
+		return map;
 	}
 	
 }
