@@ -1,5 +1,6 @@
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.AbstractProject;
@@ -101,7 +102,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		return awsSecretKey;
 	}
 
-	public Map<String, String> getParsedParameters() {
+	public Map<String, String> getParsedParameters(EnvVars env) {
 		
 		if (parameters == null || parameters.isEmpty())
 			return new HashMap<String, String>();
@@ -110,7 +111,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		String token[] = null;
 		for (String param : parameters.split(",")) {
 			token = param.split("=");
-			result.put(token[0].trim(), token[1].trim());
+			result.put(token[0].trim(), env.expand(token[1].trim()));
 		}
 		
 		return result;

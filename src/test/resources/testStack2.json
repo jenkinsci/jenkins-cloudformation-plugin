@@ -2,28 +2,22 @@
   "AWSTemplateFormatVersion": "2010-09-09",
 
   "Description": "Syncapse Shared Services Stack Platform Recipe",
+  
+  "Parameters": {
+	   "SecurityGroup": {
+	      "Type": "String",
+	      "Description" : "name of the security group to use for the instance"
+	    }
+  },
 
   "Resources": {
 
 	    "Ec2Instance" : {
 	      "Type" : "AWS::EC2::Instance",
 	      "Properties" : {
-	        "SecurityGroups" : [ { "Ref" : "InstanceSecurityGroup" } ],
+	        "SecurityGroups" : [ { "Ref" : "SecurityGroup" } ],
 	        "KeyName" : "platform-keypair",
 	        "ImageId" : "ami-76f0061f"
-	      }
-	    },
-	
-	    "InstanceSecurityGroup" : {
-	      "Type" : "AWS::EC2::SecurityGroup",
-	      "Properties" : {
-	        "GroupDescription" : "Enable SSH access via port 22",
-	        "SecurityGroupIngress" : [ {
-	          "IpProtocol" : "tcp",
-	          "FromPort" : "22",
-	          "ToPort" : "22",
-	          "CidrIp" : "0.0.0.0/0"
-	        } ]
 	      }
 	    }
 	    
@@ -44,7 +38,7 @@
     },
     "SecurityGroup": {
     	"Description" : "A security group to be reused",
-    	"Value" : { "Ref" : "InstanceSecurityGroup"}
+    	"Value" : { "Ref" : "SecurityGroup"}
     }
   }
   

@@ -3,6 +3,7 @@
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.BuildListener;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import net.sf.json.JSONObject;
 
@@ -29,7 +31,9 @@ import org.kohsuke.stapler.StaplerRequest;
  */
 public class CloudFormationBuildWrapper extends BuildWrapper {
 
-	protected List<StackBean> stacks;
+    private static final Logger LOGGER = Logger.getLogger(CloudFormationBuildWrapper.class.getName());
+
+    protected List<StackBean> stacks;
 
 	public CloudFormationBuildWrapper(List<StackBean> stackBeans) {
 		this.stacks = stackBeans;
@@ -40,16 +44,18 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 			BuildListener listener) throws IOException, InterruptedException {
 
 		final List<CloudFormation> cloudFormations = new ArrayList<CloudFormation>();
-		final Map<String, String> stackOutputs = new HashMap<String, String>();
+
+        EnvVars env = build.getEnvironment(listener);
+        env.overrideAll(build.getBuildVariables());
 
 		for (StackBean stackBean : stacks) {
 
 			final CloudFormation cloudFormation = newCloudFormation(stackBean,
-					build, listener.getLogger());
+					build, env, listener.getLogger());
 
 			if (cloudFormation.create()) {
 				cloudFormations.add(cloudFormation);
-				stackOutputs.putAll(cloudFormation.getOutputs());
+				env.putAll(cloudFormation.getOutputs());
 			} else {
 				build.setResult(Result.FAILURE);
 				return null;
@@ -72,19 +78,15 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
 			}
 
-			@Override
-			public void buildEnvVars(Map<String, String> env) {
-				env.putAll(stackOutputs);
-			}
 		};
 	}
 
 	protected CloudFormation newCloudFormation(StackBean stackBean,
-			AbstractBuild<?, ?> build, PrintStream logger) throws IOException {
-
+			AbstractBuild<?, ?> build, EnvVars env, PrintStream logger) throws IOException {
+		
 		return new CloudFormation(logger, stackBean.getStackName(), build
 				.getWorkspace().child(stackBean.getCloudFormationRecipe())
-				.readToString(), stackBean.getParsedParameters(),
+				.readToString(), stackBean.getParsedParameters(env),
 				stackBean.getTimeout(), stackBean.getAwsAccessKey(),
 				stackBean.getAwsSecretKey());
 		
