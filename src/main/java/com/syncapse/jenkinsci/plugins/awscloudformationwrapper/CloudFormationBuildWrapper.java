@@ -16,9 +16,8 @@ import hudson.tasks.BuildWrapperDescriptor;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import net.sf.json.JSONObject;
@@ -70,7 +69,10 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
 				boolean result = true;
 
-				for (CloudFormation cf : cloudFormations) {
+				List<CloudFormation> reverseOrder = new ArrayList<CloudFormation>(cloudFormations);
+				Collections.reverse(reverseOrder);
+
+				for (CloudFormation cf : reverseOrder) {
 					result = result && cf.delete();
 				}
 
