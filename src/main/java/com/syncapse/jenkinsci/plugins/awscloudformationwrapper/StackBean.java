@@ -57,11 +57,16 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 	 * The secret key to call Amazon's APIs
 	 */
 	private String awsSecretKey;
+
+    /**
+     * Whether or not the stack should be deleted automatically when the job completes
+     */
+    private boolean autoDeleteStack;
 	
 	@DataBoundConstructor
 	public StackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey) {
+			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack) {
 		
 		super();
 		this.stackName = stackName;
@@ -71,7 +76,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		this.timeout = timeout;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
-		
+        this.autoDeleteStack = autoDeleteStack;
 	}
 
 	public String getStackName() {
@@ -101,6 +106,10 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 	public String getAwsSecretKey() {
 		return awsSecretKey;
 	}
+
+    public boolean getAutoDeleteStack() {
+        return autoDeleteStack;
+    }
 
 	public Map<String, String> getParsedParameters(EnvVars env) {
 		
