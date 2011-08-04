@@ -57,7 +57,6 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 				env.putAll(cloudFormation.getOutputs());
 			} else {
 				build.setResult(Result.FAILURE);
-				return null;
 			}
 
 		}

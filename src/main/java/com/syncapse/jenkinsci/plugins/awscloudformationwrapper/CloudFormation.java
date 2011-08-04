@@ -246,5 +246,5 @@ public class CloudFormation {
 		}
 		return map;
 	}
-	
+
 }
