@@ -61,7 +61,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
     /**
      * Whether or not the stack should be deleted automatically when the job completes
      */
-    private boolean autoDeleteStack;
+    private boolean autoDeleteStack = true;
 	
 	@DataBoundConstructor
 	public StackBean(String stackName, String description,
