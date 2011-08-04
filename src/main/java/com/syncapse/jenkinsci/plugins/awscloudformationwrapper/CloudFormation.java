@@ -62,11 +62,16 @@ public class CloudFormation {
 		this.parameters = parameters(parameters);
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
-		this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
+		if (timeout == -12345){
+			this.timeout = 0; // Faster testing.
+			this.waitBetweenAttempts = 0;
+		} else{
+			this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
+			this.waitBetweenAttempts = 10; // query every 10s
+		}
 		this.logger = logger;
 		this.amazonClient = getAWSClient();
 		
-		this.waitBetweenAttempts = 10; // query every 10s
 	}
 	
 	/**
@@ -79,11 +84,11 @@ public class CloudFormation {
 		deleteStackRequest.withStackName(stackName);
 		
 		amazonClient.deleteStack(deleteStackRequest);
-		waitForStackToBeDeleted();
+		boolean result = waitForStackToBeDeleted();
 		
 		logger.println("Cloud Formation stack: " + stackName
-				+ " deleted successfully");
-		return true;
+				+ (result ? " deleted successfully" : " failed deleting.") );
+		return result;
 	}
 
 	/**
@@ -133,13 +138,24 @@ public class CloudFormation {
 		return amazonClient;
 	}
 	
-	private void waitForStackToBeDeleted() {
-		boolean deleted = false;
-		while (!deleted){
+	private boolean waitForStackToBeDeleted() {
+		
+		while (true){
+			
 			stack = getStack(amazonClient.describeStacks());
-			deleted = (stack == null);
-			if (!deleted) sleep();
+			
+			if (stack == null) return true;
+			
+			StackStatus stackStatus = getStackStatus(stack.getStackStatus());
+			
+			if (StackStatus.DELETE_COMPLETE == stackStatus) return true;
+				
+			if (StackStatus.DELETE_FAILED == stackStatus) return false;
+			
+			sleep();
+			
 		}
+		
 	}
 
 	private List<Parameter> parameters(Map<String, String> parameters) {
@@ -191,7 +207,7 @@ public class CloudFormation {
 	}
 
 	private boolean isTimeout(long startTime) {
-		return (System.currentTimeMillis() - startTime) > (timeout * 1000);
+		return timeout == 0 ? false : (System.currentTimeMillis() - startTime) > (timeout * 1000);
 	}
 
 	private Stack getStack(DescribeStacksResult result) {
