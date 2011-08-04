@@ -29,6 +29,7 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.google.common.collect.Lists;
 
 /**
+ * Class for interacting with CloudFormation stacks, including creating them, deleting them and getting the outputs.
  * @author erickdovale
  * 
  */
@@ -50,12 +51,14 @@ public class CloudFormation {
 	private AmazonCloudFormation amazonClient;
 	private Stack stack;
 	private long waitBetweenAttempts;
+    private boolean autoDeleteStack;
 
 	private Map<String, String> outputs;
 
 	public CloudFormation(PrintStream logger, String stackName,
 			String recipeBody, Map<String, String> parameters,
-			long timeout, String awsAccessKey, String awsSecretKey) {
+			long timeout, String awsAccessKey, String awsSecretKey,
+            boolean autoDeleteStack) {
 
 		this.stackName = stackName;
 		this.recipe = recipeBody;
@@ -71,8 +74,19 @@ public class CloudFormation {
 		}
 		this.logger = logger;
 		this.amazonClient = getAWSClient();
+        this.autoDeleteStack = autoDeleteStack;
 		
 	}
+
+    /**
+     * Return true if this stack should be automatically deleted at the end of the job, or false if it should not
+     * be automatically deleted.
+     * @return true if this stack should be automatically deleted at the end of the job, or false if it should not
+     * be automatically deleted.
+     */
+    public boolean getAutoDeleteStack() {
+        return autoDeleteStack;
+    }
 	
 	/**
 	 * @return

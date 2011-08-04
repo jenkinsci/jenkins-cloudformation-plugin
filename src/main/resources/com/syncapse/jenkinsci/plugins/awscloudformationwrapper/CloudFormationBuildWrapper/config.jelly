@@ -62,7 +62,15 @@
 						</f:entry>
 					</td>
 				</tr>
-				
+
+                <tr>
+					<td>
+						<f:entry title="Automatically delete the stack when the job completes" >
+							<f:checkbox name="stack.stack.autoDeleteStack" checked="${stack.autoDeleteStack}" default="true"/>
+						</f:entry>
+					</td>
+				</tr>
+
 				<tr>
 					<td align="right">
 						<div align="right">
