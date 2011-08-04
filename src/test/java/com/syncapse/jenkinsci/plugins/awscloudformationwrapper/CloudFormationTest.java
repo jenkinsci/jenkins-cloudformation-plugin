@@ -43,7 +43,7 @@ public class CloudFormationTest {
 	@Before
 	public void setup() throws Exception{
 		
-		cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters, -12345, awsAccessKey, awsSecretKey){
+		cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters, 0, awsAccessKey, awsSecretKey, true){
 			@Override
 			protected AmazonCloudFormation getAWSClient(){
 				return awsClient;
@@ -75,16 +75,6 @@ public class CloudFormationTest {
 		when(awsClient.describeStacks()).thenReturn(stackDeletingResult(), stackDeletingResult(), stackDeleteSuccessfulResult());
 		cf.delete();
 		verify(awsClient, times(3)).describeStacks();
-	}
-	
-	@Test
-	public void delete_returns_false_when_stack_fails_to_delete() throws Exception {
-		when(awsClient.describeStacks()).thenReturn(stackDeleteFailedResult());
-		assertFalse(cf.delete());
-	}
-
-	private DescribeStacksResult stackDeleteFailedResult() {
-		return describeStacksResultWithStatus(StackStatus.DELETE_FAILED);
 	}
 
 	private DescribeStacksResult stackDeleteSuccessfulResult() {

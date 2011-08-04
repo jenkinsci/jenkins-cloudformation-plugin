@@ -79,7 +79,11 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 				Collections.reverse(reverseOrder);
 
 				for (CloudFormation cf : reverseOrder) {
-					result = result && cf.delete();
+                    // automatically delete the stack?
+                    if (cf.getAutoDeleteStack()) {
+                        // delete the stack
+                        result = result && cf.delete();
+                    }
 				}
 
 				return result;
@@ -96,7 +100,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 				.getWorkspace().child(stackBean.getCloudFormationRecipe())
 				.readToString(), stackBean.getParsedParameters(env),
 				stackBean.getTimeout(), stackBean.getAwsAccessKey(),
-				stackBean.getAwsSecretKey());
+				stackBean.getAwsSecretKey(), stackBean.getAutoDeleteStack());
 		
 	}
 
