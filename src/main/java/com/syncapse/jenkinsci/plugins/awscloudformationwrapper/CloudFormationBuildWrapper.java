@@ -30,7 +30,7 @@ import org.kohsuke.stapler.StaplerRequest;
  */
 public class CloudFormationBuildWrapper extends BuildWrapper {
 
-    private static final Logger LOGGER = Logger.getLogger(CloudFormationBuildWrapper.class.getName());
+    private static final Logger logger = Logger.getLogger(CloudFormationBuildWrapper.class.getName());
 
     protected List<StackBean> stacks;
 
@@ -52,11 +52,18 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 			final CloudFormation cloudFormation = newCloudFormation(stackBean,
 					build, env, listener.getLogger());
 
-			if (cloudFormation.create()) {
-				cloudFormations.add(cloudFormation);
-				env.putAll(cloudFormation.getOutputs());
-			} else {
+			try {
+				if (cloudFormation.create()) {
+					cloudFormations.add(cloudFormation);
+					env.putAll(cloudFormation.getOutputs());
+				} else {
+					build.setResult(Result.FAILURE);
+					break;
+				}
+			} catch (TimeoutException e) {
+				listener.getLogger().append("ERROR creating stack with name " + stackBean.getStackName() + ". Operation timedout. Try increasing the timeout period in your stack configuration.");
 				build.setResult(Result.FAILURE);
+				break;
 			}
 
 		}

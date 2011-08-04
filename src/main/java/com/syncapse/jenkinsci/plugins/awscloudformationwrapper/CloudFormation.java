@@ -3,7 +3,6 @@
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,7 +37,7 @@ public class CloudFormation {
 	 * Minimum time to wait before considering the creation of the stack a failure. 
 	 * Default value is 5 minutes. (300 seconds)
 	 */
-	private static final long MIN_TIMEOUT = 300;
+	public static final long MIN_TIMEOUT = 300;
 
 	private String stackName;
 	private String recipe;
@@ -53,6 +52,15 @@ public class CloudFormation {
 
 	private Map<String, String> outputs;
 
+	/**
+	 * @param logger a logger to write progress information.
+	 * @param stackName the name of the stack as defined in the AWS CloudFormation API.
+	 * @param recipeBody the body of the json document describing the stack.
+	 * @param parameters a Map of where the keys are the param name and the value the param value.
+	 * @param timeout Time to wait for the creation of a stack to complete. This value will be the greater between {@link #MIN_TIMEOUT} and the given value.
+	 * @param awsAccessKey the AWS API Access Key.
+	 * @param awsSecretKey the AWS API Secret Key.
+	 */
 	public CloudFormation(PrintStream logger, String stackName,
 			String recipeBody, Map<String, String> parameters,
 			long timeout, String awsAccessKey, String awsSecretKey) {
@@ -92,11 +100,13 @@ public class CloudFormation {
 	}
 
 	/**
-	 * @return A Map containing all outputs or null if creating the stack fails.
+	 * @return True of the stack was created successfully. False otherwise.
 	 * 
-	 * @throws IOException
+	 * @throws TimeoutException if creating the stack takes longer than the timeout value passed during creation.
+	 * 
+	 * @see CloudFormation#CloudFormation(PrintStream, String, String, Map, long, String, String)
 	 */
-	public boolean create() throws IOException {
+	public boolean create() throws TimeoutException {
 
 		logger.println("Creating Cloud Formation stack: " + stackName);
 		
@@ -104,6 +114,7 @@ public class CloudFormation {
 		
 		try {
 			amazonClient.createStack(request);
+			
 			stack = waitForStackToBeCreated();
 			
 			StackStatus status = getStackStatus(stack.getStackStatus());
@@ -176,12 +187,16 @@ public class CloudFormation {
 		return result;
 	}
 
-	private Stack waitForStackToBeCreated() {
+	private Stack waitForStackToBeCreated() throws TimeoutException{
+		
 		DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(stackName);
 		StackStatus status = StackStatus.CREATE_IN_PROGRESS;
 		Stack stack = null;
 		long startTime = System.currentTimeMillis();
-		while ( isStackCreationInProgress(status) && !isTimeout(startTime)){
+		while ( isStackCreationInProgress(status) ){
+			if (isTimeout(startTime)){
+				throw new TimeoutException("Timed out waiting for stack to be created. (timeout=" + timeout + ")");
+			}
 			stack = getStack(amazonClient.describeStacks(describeStacksRequest));
 			status = getStackStatus(stack.getStackStatus());
 			if (isStackCreationInProgress(status)) sleep();
@@ -244,7 +259,7 @@ public class CloudFormation {
 		return result;
 	}
 
-	private CreateStackRequest createStackRequest() throws IOException {
+	private CreateStackRequest createStackRequest() {
 
 		CreateStackRequest r = new CreateStackRequest();
 		r.withStackName(stackName);
