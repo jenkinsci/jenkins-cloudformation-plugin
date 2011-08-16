@@ -106,14 +106,6 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	@Extension
 	public static class DescriptorImpl extends BuildWrapperDescriptor {
 
-//		@Override
-//		public BuildWrapper newInstance(StaplerRequest req,
-//				final JSONObject formData) throws FormException {
-//			List<StackBean> stacks = req.bindParametersToList(StackBean.class,
-//					"stack.stack.");
-//			return new CloudFormationBuildWrapper(stacks);
-//		}
-//
 		@Override
 		public String getDisplayName() {
 			return "Create AWS Cloud Formation stack";
