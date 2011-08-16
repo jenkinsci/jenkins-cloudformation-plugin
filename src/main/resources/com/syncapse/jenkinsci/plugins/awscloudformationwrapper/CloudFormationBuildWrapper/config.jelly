@@ -1,89 +1,9 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-         
-	<f:entry title="Cloud Formation Stacks">
-		<br/>
-		
-		<f:repeatable var="stack" varStatus="loopStatus" items="${instance.stacks}" minimum="1">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-			<table width="100%">
-				<tr>
-					<td>
-						<f:entry title="Cloud Formation recipe file. (.json)" >
-							<f:textbox name="stack.stack.cloudFormationRecipe" value="${stack.CloudFormationRecipe}"/>
-						</f:entry>
-					</td>
-				</tr>
-				
-				<tr>
-					<td>
-						<f:entry title="Stack name">
-							<f:textbox  name="stack.stack.stackName" value="${stack.stackName}"/>
-						</f:entry>
-					</td>
-				</tr>
-				
-				<tr>
-					<td>
-						<f:entry title="Stack description" >
-							<f:expandableTextbox name="stack.stack.description" value="${stack.description}"/>
-						</f:entry>
-					</td>
-				</tr>
-				
-				<tr>
-					<td>
-						<f:entry title="Cloud Formation parameters" >
-							<f:textbox name="stack.stack.parameters" value="${stack.parameters}"/>
-						</f:entry>
-					</td>
-				</tr>
-				
-				<tr>
-					<td>
-						<f:entry title="Timeout (seconds)" >
-							<f:textbox name="stack.stack.timeout" value="${stack.timeout}"/>
-						</f:entry>
-					</td>
-				</tr>
-				
-				<tr>
-					<td>
-						<f:entry title="AWS Access Key" >
-							<f:textbox name="stack.stack.awsAccessKey" value="${stack.awsAccessKey}"/>
-						</f:entry>
-					</td>
-				</tr>
-				
-				<tr>
-					<td>
-						<f:entry title="AWS Secret Key" >
-							<f:textbox name="stack.stack.awsSecretKey" value="${stack.awsSecretKey}"/>
-						</f:entry>
-					</td>
-				</tr>
-
-                <tr>
-					<td>
-						<f:entry title="Automatically delete the stack when the job completes" >
-							<f:checkbox name="stack.stack.autoDeleteStack" checked="${stack.autoDeleteStack}" default="true"/>
-						</f:entry>
-					</td>
-				</tr>
-
-				<tr>
-					<td align="right">
-						<div align="right">
-							<f:repeatableDeleteButton/>
-						</div>
-					</td>
-				</tr>
-				
-	
- 			</table>
- 			<hr/>
-		</f:repeatable>
-
+	<f:entry>
+		<f:repeatableProperty field="stacks" minimum="1" header="Stack configuration" add="Add another AWS Stack">
+		</f:repeatableProperty>
 	</f:entry>
 
 </j:jelly>

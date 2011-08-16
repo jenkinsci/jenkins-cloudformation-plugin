@@ -20,9 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
-import net.sf.json.JSONObject;
-
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * @author erickdovale
@@ -34,8 +32,9 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
     protected List<StackBean> stacks;
 
-	public CloudFormationBuildWrapper(List<StackBean> stackBeans) {
-		this.stacks = stackBeans;
+    @DataBoundConstructor
+	public CloudFormationBuildWrapper(List<StackBean> stacks) {
+		this.stacks = stacks;
 	}
 
 	@Override
@@ -107,18 +106,14 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	@Extension
 	public static class DescriptorImpl extends BuildWrapperDescriptor {
 
-		public DescriptorImpl() {
-			super(CloudFormationBuildWrapper.class);
-		}
-
-		@Override
-		public BuildWrapper newInstance(StaplerRequest req,
-				final JSONObject formData) throws FormException {
-			List<StackBean> stacks = req.bindParametersToList(StackBean.class,
-					"stack.stack.");
-			return new CloudFormationBuildWrapper(stacks);
-		}
-
+//		@Override
+//		public BuildWrapper newInstance(StaplerRequest req,
+//				final JSONObject formData) throws FormException {
+//			List<StackBean> stacks = req.bindParametersToList(StackBean.class,
+//					"stack.stack.");
+//			return new CloudFormationBuildWrapper(stacks);
+//		}
+//
 		@Override
 		public String getDisplayName() {
 			return "Create AWS Cloud Formation stack";
