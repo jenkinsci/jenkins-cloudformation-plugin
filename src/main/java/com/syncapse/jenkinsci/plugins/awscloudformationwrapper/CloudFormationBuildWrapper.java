@@ -18,6 +18,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -32,16 +33,26 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
     protected List<StackBean> stacks;
 
+	private final List<CloudFormation> cloudFormations = new ArrayList<CloudFormation>();
+
     @DataBoundConstructor
 	public CloudFormationBuildWrapper(List<StackBean> stacks) {
 		this.stacks = stacks;
 	}
+    
+    @Override
+    public void makeBuildVariables(AbstractBuild build,
+    		Map<String, String> variables) {
+    	
+    	for (CloudFormation cf : cloudFormations){
+    		variables.putAll(cf.getOutputs());
+    	}
+    	
+    }
 
 	@Override
 	public Environment setUp(AbstractBuild build, Launcher launcher,
 			BuildListener listener) throws IOException, InterruptedException {
-
-		final List<CloudFormation> cloudFormations = new ArrayList<CloudFormation>();
 
         EnvVars env = build.getEnvironment(listener);
         env.overrideAll(build.getBuildVariables());
