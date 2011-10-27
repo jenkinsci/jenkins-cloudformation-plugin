@@ -126,6 +126,15 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		return result;
 	}
 	
+	public String getParsedAwsAccessKey(EnvVars env) {
+		return env.expand(getAwsAccessKey());
+	}
+
+	
+	public String getParsedAwsSecretKey(EnvVars env) {
+		return env.expand(getAwsSecretKey());
+	}
+
 	@Extension
 	public static final class DescriptorImpl extends Descriptor<StackBean>{
 		
@@ -184,5 +193,6 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		}
 
 	}
+
 
 }
