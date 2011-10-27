@@ -33,7 +33,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
     protected List<StackBean> stacks;
 
-	private final List<CloudFormation> cloudFormations = new ArrayList<CloudFormation>();
+	private final transient List<CloudFormation> cloudFormations = new ArrayList<CloudFormation>();
 
     @DataBoundConstructor
 	public CloudFormationBuildWrapper(List<StackBean> stacks) {
