@@ -29,33 +29,34 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 public class CloudFormationBuildWrapper extends BuildWrapper {
 
-    private static final Logger logger = Logger.getLogger(CloudFormationBuildWrapper.class.getName());
+	private static final Logger logger = Logger
+			.getLogger(CloudFormationBuildWrapper.class.getName());
 
-    protected List<StackBean> stacks;
+	protected List<StackBean> stacks;
 
-	private final transient List<CloudFormation> cloudFormations = new ArrayList<CloudFormation>();
+	private transient List<CloudFormation> cloudFormations = new ArrayList<CloudFormation>();
 
-    @DataBoundConstructor
+	@DataBoundConstructor
 	public CloudFormationBuildWrapper(List<StackBean> stacks) {
 		this.stacks = stacks;
 	}
-    
-    @Override
-    public void makeBuildVariables(AbstractBuild build,
-    		Map<String, String> variables) {
-    	
-    	for (CloudFormation cf : cloudFormations){
-    		variables.putAll(cf.getOutputs());
-    	}
-    	
-    }
+
+	@Override
+	public void makeBuildVariables(AbstractBuild build,
+			Map<String, String> variables) {
+
+		for (CloudFormation cf : cloudFormations) {
+			variables.putAll(cf.getOutputs());
+		}
+
+	}
 
 	@Override
 	public Environment setUp(AbstractBuild build, Launcher launcher,
 			BuildListener listener) throws IOException, InterruptedException {
 
-        EnvVars env = build.getEnvironment(listener);
-        env.overrideAll(build.getBuildVariables());
+		EnvVars env = build.getEnvironment(listener);
+		env.overrideAll(build.getBuildVariables());
 
 		for (StackBean stackBean : stacks) {
 
@@ -71,7 +72,10 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 					break;
 				}
 			} catch (TimeoutException e) {
-				listener.getLogger().append("ERROR creating stack with name " + stackBean.getStackName() + ". Operation timedout. Try increasing the timeout period in your stack configuration.");
+				listener.getLogger()
+						.append("ERROR creating stack with name "
+								+ stackBean.getStackName()
+								+ ". Operation timedout. Try increasing the timeout period in your stack configuration.");
 				build.setResult(Result.FAILURE);
 				break;
 			}
@@ -85,15 +89,16 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
 				boolean result = true;
 
-				List<CloudFormation> reverseOrder = new ArrayList<CloudFormation>(cloudFormations);
+				List<CloudFormation> reverseOrder = new ArrayList<CloudFormation>(
+						cloudFormations);
 				Collections.reverse(reverseOrder);
 
 				for (CloudFormation cf : reverseOrder) {
-                    // automatically delete the stack?
-                    if (cf.getAutoDeleteStack()) {
-                        // delete the stack
-                        result = result && cf.delete();
-                    }
+					// automatically delete the stack?
+					if (cf.getAutoDeleteStack()) {
+						// delete the stack
+						result = result && cf.delete();
+					}
 				}
 
 				return result;
@@ -104,14 +109,16 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	}
 
 	protected CloudFormation newCloudFormation(StackBean stackBean,
-			AbstractBuild<?, ?> build, EnvVars env, PrintStream logger) throws IOException {
-		
+			AbstractBuild<?, ?> build, EnvVars env, PrintStream logger)
+			throws IOException {
+
 		return new CloudFormation(logger, stackBean.getStackName(), build
 				.getWorkspace().child(stackBean.getCloudFormationRecipe())
 				.readToString(), stackBean.getParsedParameters(env),
 				stackBean.getTimeout(), stackBean.getParsedAwsAccessKey(env),
-				stackBean.getParsedAwsSecretKey(env), stackBean.getAutoDeleteStack());
-		
+				stackBean.getParsedAwsSecretKey(env),
+				stackBean.getAutoDeleteStack());
+
 	}
 
 	@Extension
@@ -133,4 +140,13 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 		return stacks;
 	}
 
+	/**
+	 * @return
+	 */
+	private Object readResolve() {
+		// Initialize the cloud formation collection during deserialization to avoid NPEs. 
+		cloudFormations = new ArrayList<CloudFormation>();
+		return this;
+	}
+	
 }
