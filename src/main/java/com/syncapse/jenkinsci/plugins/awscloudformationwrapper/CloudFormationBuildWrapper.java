@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -28,9 +27,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * 
  */
 public class CloudFormationBuildWrapper extends BuildWrapper {
-
-	private static final Logger logger = Logger
-			.getLogger(CloudFormationBuildWrapper.class.getName());
 
 	protected List<StackBean> stacks;
 
@@ -55,9 +51,11 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	public Environment setUp(AbstractBuild build, Launcher launcher,
 			BuildListener listener) throws IOException, InterruptedException {
 
-		EnvVars env = build.getEnvironment(listener);
-		env.overrideAll(build.getBuildVariables());
-
+        EnvVars env = build.getEnvironment(listener);
+        env.overrideAll(build.getBuildVariables());
+        
+        boolean success = true;
+        
 		for (StackBean stackBean : stacks) {
 
 			final CloudFormation cloudFormation = newCloudFormation(stackBean,
@@ -69,6 +67,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 					env.putAll(cloudFormation.getOutputs());
 				} else {
 					build.setResult(Result.FAILURE);
+					success = false;
 					break;
 				}
 			} catch (TimeoutException e) {
@@ -77,9 +76,16 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 								+ stackBean.getStackName()
 								+ ". Operation timedout. Try increasing the timeout period in your stack configuration.");
 				build.setResult(Result.FAILURE);
+				success = false;
 				break;
 			}
 
+		}
+		
+		// If any stack fails to create then destroy them all
+		if (!success) {
+			doTearDown();
+			return null;
 		}
 
 		return new Environment() {
@@ -87,25 +93,28 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 			public boolean tearDown(AbstractBuild build, BuildListener listener)
 					throws IOException, InterruptedException {
 
-				boolean result = true;
-
-				List<CloudFormation> reverseOrder = new ArrayList<CloudFormation>(
-						cloudFormations);
-				Collections.reverse(reverseOrder);
-
-				for (CloudFormation cf : reverseOrder) {
-					// automatically delete the stack?
-					if (cf.getAutoDeleteStack()) {
-						// delete the stack
-						result = result && cf.delete();
-					}
-				}
-
-				return result;
-
+				return doTearDown();
+				
 			}
 
 		};
+	}
+	
+	protected boolean doTearDown() throws IOException, InterruptedException{
+		boolean result = true;
+
+		List<CloudFormation> reverseOrder = new ArrayList<CloudFormation>(cloudFormations);
+		Collections.reverse(reverseOrder);
+
+		for (CloudFormation cf : reverseOrder) {
+            // automatically delete the stack?
+            if (cf.getAutoDeleteStack()) {
+                // delete the stack
+                result = result && cf.delete();
+            }
+		}
+
+		return result;
 	}
 
 	protected CloudFormation newCloudFormation(StackBean stackBean,

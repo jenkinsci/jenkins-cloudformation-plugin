@@ -2,6 +2,7 @@ package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.doReturn;
@@ -53,7 +54,7 @@ public class CloudFormationBuildWrapperTest {
 	}
 
 	@Test
-	public void when_2_stacks_are_entered_and_2nd_fails_to_create_first_is_deleted()
+	public void when_2_stacks_are_entered_and_2nd_fails_to_create_first_is_deleted_and_wrtpper_returns_null_for_environment()
 			throws Exception {
 		when_2_stack_are_entered();
 		and_2nd_stack_fails_to_create();
@@ -64,7 +65,7 @@ public class CloudFormationBuildWrapperTest {
 		Environment env = wrapper.setUp(build, launcher, listener);
 		verify(mockCF1, times(1)).create();
 		verify(mockCF2, times(1)).create();
-		env.tearDown(build, listener);
+		assertNull(env);
 		verify(mockCF1, times(1)).delete();
 	}
 

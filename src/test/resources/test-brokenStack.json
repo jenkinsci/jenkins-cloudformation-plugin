@@ -1,0 +1,51 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": "Broken stack. Does not parse",
+  
+  
+  
+  this comment is here to cause the stack not to parse.
+  
+  
+  
+  "Parameters": {
+	   "SecurityGroup": {
+	      "Type": "String",
+	      "Description" : "name of the security group to use for the instance"
+	    }
+  },
+
+  "Resources": {
+
+	    "Ec2Instance" : {
+	      "Type" : "AWS::EC2::Instance",
+	      "Properties" : {
+	        "SecurityGroups" : [ { "Ref" : "SecurityGroup" } ],
+	        "KeyName" : "platform-keypair",
+	        "ImageId" : "ami-76f0061f"
+	      }
+	    }
+	    
+  },
+
+  "Outputs" : {
+    "InstanceId" : {
+      "Description" : "InstanceId of the newly created EC2 instance",
+      "Value" : { "Ref" : "Ec2Instance" }
+    },
+    "AZ" : {
+      "Description" : "Availability Zone of the newly created EC2 instance",
+      "Value" : { "Fn::GetAtt" : [ "Ec2Instance", "AvailabilityZone" ] }
+    },
+    "PublicIP" : {
+      "Description" : "Public IP address of the newly created EC2 instance",
+      "Value" : { "Fn::GetAtt" : [ "Ec2Instance", "PublicIp" ] }
+    },
+    "SecurityGroup": {
+    	"Description" : "A security group to be reused",
+    	"Value" : { "Ref" : "SecurityGroup"}
+    }
+  }
+  
+}

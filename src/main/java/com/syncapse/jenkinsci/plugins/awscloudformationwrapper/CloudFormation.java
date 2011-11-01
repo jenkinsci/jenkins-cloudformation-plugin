@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
@@ -148,11 +149,22 @@ public class CloudFormation {
 				logger.println("Failed to create stack: " + stackName + ". Reason: " + stack.getStackStatusReason());
 				return false;
 			}
+		} catch (AmazonServiceException e) {
+			logger.println("Failed to create stack: " + stackName + ". Reason: " + detailedError(e));
+			return false;
 		} catch (AmazonClientException e) {
-			logger.println("Failed to create stack: " + stackName + ". Reason: " + e.getLocalizedMessage());
+			logger.println("Failed to create stack: " + stackName + ". Error was: " + e.getCause());
 			return false;
 		}
 
+	}
+	
+	private String detailedError(AmazonServiceException e){
+		StringBuffer message = new StringBuffer();
+		message.append("Detailed Message: ").append(e.getMessage()).append('\n');
+		message.append("Status Code: ").append(e.getStatusCode()).append('\n');
+		message.append("Error Code: ").append(e.getErrorCode()).append('\n');
+		return message.toString();
 	}
 
 	protected AmazonCloudFormation getAWSClient() {
