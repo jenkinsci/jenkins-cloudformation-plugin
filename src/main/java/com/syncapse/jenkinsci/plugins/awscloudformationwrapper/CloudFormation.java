@@ -279,7 +279,8 @@ public class CloudFormation {
 		r.withStackName(stackName);
 		r.withParameters(parameters);
 		r.withTemplateBody(recipe);
-
+		r.withCapabilities("CAPABILITY_IAM");
+		
 		return r;
 	}
 
