@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -24,16 +25,17 @@ import java.util.logging.Logger;
  */
 public class CloudFormationNotifier extends Notifier {
 	private static final Logger LOGGER = Logger.getLogger(CloudFormationNotifier.class.getName());
-	private final String stackName;
-	private final String accessKey;
-	private final String secretKey;
+	private final List<SimpleStackBean> stacks;
 
 	@DataBoundConstructor
-	public CloudFormationNotifier(String stackName, String accessKey, String secretKey) {
-		this.stackName = stackName;
-		this.accessKey = accessKey;
-		this.secretKey = secretKey;
+	public CloudFormationNotifier(List<SimpleStackBean> stacks) {
+		this.stacks = stacks;
 	}
+
+	public List<SimpleStackBean> getStacks() {
+		return stacks;
+	}
+
 
 	public BuildStepMonitor getRequiredMonitorService() {
 		return BuildStepMonitor.BUILD;
@@ -60,15 +62,27 @@ public class CloudFormationNotifier extends Notifier {
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		EnvVars envVars = build.getEnvironment(listener);
-		CloudFormation cloudFormation = new CloudFormation(new PrintStream(new ByteOutputStream()), stackName, "", new HashMap<String, String>(), 0, accessKey, secretKey, false, envVars);
-		if(cloudFormation.delete()) {
-			LOGGER.info("Success");
-			return true;
-		} else {
-			LOGGER.warning("Failed");
-			return false;
+		boolean result = true;
+		for (SimpleStackBean stack : stacks) {
+			CloudFormation cloudFormation = new CloudFormation(
+					new PrintStream(new ByteOutputStream()),
+					stack.getStackName(),
+					"",
+					new HashMap<String, String>(),
+					0,
+					stack.getAwsAccessKey(),
+					stack.getAwsSecretKey(),
+					false,
+					envVars
+			);
+			if(cloudFormation.delete()) {
+				LOGGER.info("Success");
+			} else {
+				LOGGER.warning("Failed");
+				result = false;
+			}
 		}
-
+		return result;
 	}
 
 	@Override

@@ -1,15 +1,9 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
 	<f:entry>
-		<f:entry title="Stack name" field="stackName">
-			<input class="setting-input" name="stackName" type="text" />
-		</f:entry>
-		<f:entry title="AWS Access Key" field="accessKey">
-			<input class="setting-input" name="accessKey" type="text" />
-		</f:entry>
-		<f:entry title="AWS Secret Key" field="secretKey">
-			<input class="setting-input" name="secretKey" type="text" />
-		</f:entry>
+		<f:repeatableProperty field="stacks" minimum="1" header="Stack configuration" add="Add another AWS Stack">
+		</f:repeatableProperty>
 	</f:entry>
 
 </j:jelly>
