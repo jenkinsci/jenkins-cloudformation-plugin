@@ -27,6 +27,7 @@ import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackEvent;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.google.common.collect.Lists;
+import hudson.EnvVars;
 
 /**
  * Class for interacting with CloudFormation stacks, including creating them, deleting them and getting the outputs.
@@ -52,6 +53,7 @@ public class CloudFormation {
 	private Stack stack;
 	private long waitBetweenAttempts;
     private boolean autoDeleteStack;
+	private EnvVars envVars;
 
 	private Map<String, String> outputs;
 
@@ -67,7 +69,7 @@ public class CloudFormation {
 	public CloudFormation(PrintStream logger, String stackName,
 			String recipeBody, Map<String, String> parameters,
 			long timeout, String awsAccessKey, String awsSecretKey,
-            boolean autoDeleteStack) {
+            boolean autoDeleteStack, EnvVars envVars) {
 
 		this.stackName = stackName;
 		this.recipe = recipeBody;
@@ -84,7 +86,7 @@ public class CloudFormation {
 		this.logger = logger;
 		this.amazonClient = getAWSClient();
         this.autoDeleteStack = autoDeleteStack;
-		
+		this.envVars = envVars;
 	}
 
     /**
@@ -101,15 +103,15 @@ public class CloudFormation {
 	 * @return
 	 */
 	public boolean delete() {
-		logger.println("Deleting Cloud Formation stack: " + stackName);
+		logger.println("Deleting Cloud Formation stack: " + getExpandedStackName());
 		
 		DeleteStackRequest deleteStackRequest = new DeleteStackRequest();
-		deleteStackRequest.withStackName(stackName);
+		deleteStackRequest.withStackName(getExpandedStackName());
 		
 		amazonClient.deleteStack(deleteStackRequest);
 		boolean result = waitForStackToBeDeleted();
 		
-		logger.println("Cloud Formation stack: " + stackName
+		logger.println("Cloud Formation stack: " + getExpandedStackName()
 				+ (result ? " deleted successfully" : " failed deleting.") );
 		return result;
 	}
@@ -123,7 +125,7 @@ public class CloudFormation {
 	 */
 	public boolean create() throws TimeoutException {
 
-		logger.println("Creating Cloud Formation stack: " + stackName);
+		logger.println("Creating Cloud Formation stack: " + getExpandedStackName());
 		
 		CreateStackRequest request = createStackRequest();
 		
@@ -141,19 +143,19 @@ public class CloudFormation {
 					stackOutput.put(output.getOutputKey(), output.getOutputValue());
 				}
 				
-				logger.println("Successfully created stack: " + stackName);
+				logger.println("Successfully created stack: " + getExpandedStackName());
 				
 				this.outputs = stackOutput;
 				return true;
 			} else{
-				logger.println("Failed to create stack: " + stackName + ". Reason: " + stack.getStackStatusReason());
+				logger.println("Failed to create stack: " + getExpandedStackName() + ". Reason: " + stack.getStackStatusReason());
 				return false;
 			}
 		} catch (AmazonServiceException e) {
-			logger.println("Failed to create stack: " + stackName + ". Reason: " + detailedError(e));
+			logger.println("Failed to create stack: " + getExpandedStackName() + ". Reason: " + detailedError(e));
 			return false;
 		} catch (AmazonClientException e) {
-			logger.println("Failed to create stack: " + stackName + ". Error was: " + e.getCause());
+			logger.println("Failed to create stack: " + getExpandedStackName() + ". Error was: " + e.getCause());
 			return false;
 		}
 
@@ -215,7 +217,7 @@ public class CloudFormation {
 
 	private Stack waitForStackToBeCreated() throws TimeoutException{
 		
-		DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(stackName);
+		DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(getExpandedStackName());
 		StackStatus status = StackStatus.CREATE_IN_PROGRESS;
 		Stack stack = null;
 		long startTime = System.currentTimeMillis();
@@ -235,7 +237,7 @@ public class CloudFormation {
 
 	private void printStackEvents() {
 		DescribeStackEventsRequest r = new DescribeStackEventsRequest();
-		r.withStackName(stackName);
+		r.withStackName(getExpandedStackName());
 		DescribeStackEventsResult describeStackEvents = amazonClient.describeStackEvents(r);
 		
 		List<StackEvent> stackEvents = describeStackEvents.getStackEvents();
@@ -253,7 +255,7 @@ public class CloudFormation {
 
 	private Stack getStack(DescribeStacksResult result) {
 		for (Stack aStack : result.getStacks())
-			if (stackName.equals(aStack.getStackName())){
+			if (getExpandedStackName().equals(aStack.getStackName())){
 				return aStack;
 			}
 		
@@ -288,7 +290,7 @@ public class CloudFormation {
 	private CreateStackRequest createStackRequest() {
 
 		CreateStackRequest r = new CreateStackRequest();
-		r.withStackName(stackName);
+		r.withStackName(getExpandedStackName());
 		r.withParameters(parameters);
 		r.withTemplateBody(recipe);
 		r.withCapabilities("CAPABILITY_IAM");
@@ -300,9 +302,12 @@ public class CloudFormation {
 		// Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
 		HashMap<String, String> map = new HashMap<String, String>();
 		for (String key : outputs.keySet()) {
-			map.put(stackName + "_" + key, outputs.get(key));
+			map.put(getExpandedStackName() + "_" + key, outputs.get(key));
 		}
 		return map;
 	}
 
+	private String getExpandedStackName() {
+		return envVars.expand(stackName);
+	}
 }
