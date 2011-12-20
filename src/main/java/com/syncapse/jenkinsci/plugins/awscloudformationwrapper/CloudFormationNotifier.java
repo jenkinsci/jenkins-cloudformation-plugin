@@ -65,7 +65,7 @@ public class CloudFormationNotifier extends Notifier {
 		boolean result = true;
 		for (SimpleStackBean stack : stacks) {
 			CloudFormation cloudFormation = new CloudFormation(
-					new PrintStream(new ByteOutputStream()),
+					listener.getLogger(),
 					stack.getStackName(),
 					"",
 					new HashMap<String, String>(),
