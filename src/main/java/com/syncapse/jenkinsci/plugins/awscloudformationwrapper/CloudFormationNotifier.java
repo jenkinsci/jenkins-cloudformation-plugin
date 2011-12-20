@@ -1,6 +1,5 @@
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -12,7 +11,6 @@ import hudson.tasks.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
