@@ -66,5 +66,20 @@ public class StackBeanTest {
 		assertTrue(stackBean.getParsedParameters(env).values().size() == 4);
 		
 	}
+	
+	@Test
+	public void parsingParameters_With_Semicolons_Expand_Variables() throws Exception {
+		env.put("value1", "expandedValue1");
+		env.put("value2", "expandedValue2");
+		String parameters = "key1=$value1;key2=${value2}; key3=v1,v2,v3,v4; key4=${value4}";
+		stackBean = new StackBean("name", "description", "aRecipe", parameters, 0, "awsAccessKey", "awsSecretKey", true);
+		
+		assertTrue(stackBean.getParsedParameters(env).get("key1").equals("expandedValue1"));
+		assertTrue(stackBean.getParsedParameters(env).get("key2").equals("expandedValue2"));
+		assertTrue(stackBean.getParsedParameters(env).get("key3").equals("v1,v2,v3,v4"));
+		assertTrue(stackBean.getParsedParameters(env).get("key4").equals("${value4}"));
+		assertTrue(stackBean.getParsedParameters(env).values().size() == 4);
+		
+	}
 
 }

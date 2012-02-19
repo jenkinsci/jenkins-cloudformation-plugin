@@ -118,11 +118,20 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		
 		Map<String, String> result = new HashMap<String, String>();
 		String token[] = null;
-		for (String param : parameters.split(",")) {
-			token = param.split("=");
-			result.put(token[0].trim(), env.expand(token[1].trim()));
-		}
 		
+		//semicolon delimited list
+		if(parameters.contains(";")) {
+			for (String param : parameters.split(";")) {
+				token = param.split("=");
+				result.put(token[0].trim(), env.expand(token[1].trim()));
+			}
+		} else {
+			//comma delimited parameter list
+			for (String param : parameters.split(",")) {
+				token = param.split("=");
+				result.put(token[0].trim(), env.expand(token[1].trim()));
+			}
+		}
 		return result;
 	}
 	
