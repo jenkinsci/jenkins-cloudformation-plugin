@@ -71,6 +71,7 @@ public class CloudFormationNotifier extends Notifier {
 					stack.getAwsAccessKey(),
 					stack.getAwsSecretKey(),
 					false,
+                    0,
 					envVars
 			);
 			if(cloudFormation.delete()) {

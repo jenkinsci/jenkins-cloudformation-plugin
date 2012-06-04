@@ -53,7 +53,10 @@ public class CloudFormation {
 	private Stack stack;
 	private long waitBetweenAttempts;
     private boolean autoDeleteStack;
+    private int retryOnError;
 	private EnvVars envVars;
+
+    private transient int numberOfRetries = 0;
 
 	private Map<String, String> outputs;
 
@@ -69,7 +72,7 @@ public class CloudFormation {
 	public CloudFormation(PrintStream logger, String stackName,
 			String recipeBody, Map<String, String> parameters,
 			long timeout, String awsAccessKey, String awsSecretKey,
-            boolean autoDeleteStack, EnvVars envVars) {
+            boolean autoDeleteStack, int retryOnError, EnvVars envVars) {
 
 		this.stackName = stackName;
 		this.recipe = recipeBody;
@@ -86,6 +89,7 @@ public class CloudFormation {
 		this.logger = logger;
 		this.amazonClient = getAWSClient();
         this.autoDeleteStack = autoDeleteStack;
+        this.retryOnError = retryOnError;
 		this.envVars = envVars;
 	}
 
@@ -97,6 +101,10 @@ public class CloudFormation {
      */
     public boolean getAutoDeleteStack() {
         return autoDeleteStack;
+    }
+
+    public int getRetryOnError() {
+        return retryOnError;
     }
 	
 	/**
@@ -148,17 +156,41 @@ public class CloudFormation {
 				this.outputs = stackOutput;
 				return true;
 			} else{
-				logger.println("Failed to create stack: " + getExpandedStackName() + ". Reason: " + stack.getStackStatusReason());
-				return false;
+                if(numberOfRetries < retryOnError){
+                    logger.println("Failed to create stack: " + getExpandedStackName() + ". Reason: " + stack.getStackStatusReason() + ". Retrying the create process.");
+                    this.delete();
+                    numberOfRetries++;
+                    this.create();
+                }
+                else{
+                    logger.println("Failed to create stack: " + getExpandedStackName() + ". Reason: " + stack.getStackStatusReason());
+                    return false;
+                }
 			}
 		} catch (AmazonServiceException e) {
-			logger.println("Failed to create stack: " + getExpandedStackName() + ". Reason: " + detailedError(e));
-			return false;
+            if(numberOfRetries < retryOnError){
+                logger.println("Failed to create stack: " + getExpandedStackName() + ". Reason: " + detailedError(e) + ". Retrying the create process.");
+                this.delete();
+                numberOfRetries++;
+                this.create();
+            }
+			else{
+                logger.println("Failed to create stack: " + getExpandedStackName() + ". Reason: " + detailedError(e));
+                return false;
+            }
 		} catch (AmazonClientException e) {
-			logger.println("Failed to create stack: " + getExpandedStackName() + ". Error was: " + e.getCause());
-			return false;
+            if(numberOfRetries < retryOnError){
+                logger.println("Failed to create stack: " + getExpandedStackName() + ". Error was: " + e.getCause() + ". Retrying the create process.");
+                this.delete();
+                numberOfRetries++;
+                this.create();
+            }
+            else{
+                logger.println("Failed to create stack: " + getExpandedStackName() + ". Error was: " + e.getCause());
+                return false;
+            }
 		}
-
+        return false;
 	}
 	
 	private String detailedError(AmazonServiceException e){
