@@ -21,7 +21,7 @@ public class StackBeanTest {
 	public void parameterParsing_1_Param() {
 		
 		String parameters = "key1=value1";
-		stackBean = new StackBean("name", "description", "aRecipe", parameters, 0, "awsAccessKey", "awsSecretKey", true);
+		stackBean = new StackBean("name", "description", "aRecipe", parameters, 0, "awsAccessKey", "awsSecretKey", true,0);
 		
 		assertTrue(stackBean.getParsedParameters(env).get("key1").equals("value1"));
 		assertTrue(stackBean.getParsedParameters(env).values().size() == 1);
@@ -32,7 +32,7 @@ public class StackBeanTest {
 	public void parameterParsing_2_Params() {
 		
 		String parameters = "key1=value1, key2=value2"; // make sure spaces don't mess things up.
-		stackBean = new StackBean("name", "description", "aRecipe", parameters, 0, "awsAccessKey", "awsSecretKey", true);
+		stackBean = new StackBean("name", "description", "aRecipe", parameters, 0, "awsAccessKey", "awsSecretKey", true, 0);
 		
 		assertTrue(stackBean.getParsedParameters(env).get("key1").equals("value1"));
 		assertTrue(stackBean.getParsedParameters(env).get("key2").equals("value2"));
@@ -44,7 +44,7 @@ public class StackBeanTest {
 	public void parameterParsing_Is_Resilient_to_spaces() {
 		
 		String parameters = "key1 = value1,     key2    =     value2"; // make sure spaces don't mess things up.
-		stackBean = new StackBean("name", "description", "aRecipe", parameters, 0, "awsAccessKey", "awsSecretKey", true);
+		stackBean = new StackBean("name", "description", "aRecipe", parameters, 0, "awsAccessKey", "awsSecretKey", true,0);
 		
 		assertTrue(stackBean.getParsedParameters(env).get("key1").equals("value1"));
 		assertTrue(stackBean.getParsedParameters(env).get("key2").equals("value2"));
@@ -57,7 +57,7 @@ public class StackBeanTest {
 		env.put("value1", "expandedValue1");
 		env.put("value2", "expandedValue2");
 		String parameters = "key1=$value1,key2=${value2}, key3=$value3, key4=${value4}";
-		stackBean = new StackBean("name", "description", "aRecipe", parameters, 0, "awsAccessKey", "awsSecretKey", true);
+		stackBean = new StackBean("name", "description", "aRecipe", parameters, 0, "awsAccessKey", "awsSecretKey", true,0);
 		
 		assertTrue(stackBean.getParsedParameters(env).get("key1").equals("expandedValue1"));
 		assertTrue(stackBean.getParsedParameters(env).get("key2").equals("expandedValue2"));
@@ -72,7 +72,7 @@ public class StackBeanTest {
 		env.put("value1", "expandedValue1");
 		env.put("value2", "expandedValue2");
 		String parameters = "key1=$value1;key2=${value2}; key3=v1,v2,v3,v4; key4=${value4}";
-		stackBean = new StackBean("name", "description", "aRecipe", parameters, 0, "awsAccessKey", "awsSecretKey", true);
+		stackBean = new StackBean("name", "description", "aRecipe", parameters, 0, "awsAccessKey", "awsSecretKey", true,0);
 		
 		assertTrue(stackBean.getParsedParameters(env).get("key1").equals("expandedValue1"));
 		assertTrue(stackBean.getParsedParameters(env).get("key2").equals("expandedValue2"));
