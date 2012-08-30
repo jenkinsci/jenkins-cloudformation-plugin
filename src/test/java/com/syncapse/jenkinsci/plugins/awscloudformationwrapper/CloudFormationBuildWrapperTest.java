@@ -83,11 +83,8 @@ public class CloudFormationBuildWrapperTest {
 
 		wrapper = spy(new CloudFormationBuildWrapper(stackBeans));
 
-        when(mockCF1.getAutoDeleteStack()).thenReturn(true);
-        when(mockCF2.getAutoDeleteStack()).thenReturn(true);
-
-        when(mockCF1.getAwsRegion()).thenReturn("region");
-        when(mockCF2.getAwsRegion()).thenReturn("region");
+		when(mockCF1.getAutoDeleteStack()).thenReturn(true);
+		when(mockCF2.getAutoDeleteStack()).thenReturn(true);
 
 		doReturn(mockCF1).when(wrapper).newCloudFormation(
 				((StackBean)argThat(hasProperty("stackName", equalTo("stack1")))),

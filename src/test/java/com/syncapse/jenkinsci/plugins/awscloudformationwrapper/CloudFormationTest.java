@@ -36,7 +36,7 @@ public class CloudFormationTest {
 	private Map<String, String> parameters = new HashMap<String, String>();
 	private String awsAccessKey = "accessKey";
 	private String awsSecretKey = "secretKey";
-    private String awsRegion = "region";
+	private String awsRegion = "region";
 
 	@Mock
 	private AmazonCloudFormation awsClient;
@@ -97,18 +97,25 @@ public class CloudFormationTest {
 		assertFalse(cf.delete());
 	}
 
-    @Test
-    public void it_should_not_execute_setEndpoint_if_awsRegion_is_not_set() {
-        when(cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters,
+	@Test
+	public void it_should_not_execute_setEndpoint_if_awsRegion_is_not_set() {
+		final AmazonCloudFormation awsClient = mock(AmazonCloudFormation.class);
+
+		cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters,
 				-12345, awsAccessKey, awsSecretKey, null, true, new EnvVars()) {
 			@Override
 			protected AmazonCloudFormation getAWSClient() {
 				return awsClient;
 			}
-		});
-        cf.amazonClientSetEndPoint();
-        verifyZeroInteractions(awsClient);
-    }
+		};
+
+		verifyZeroInteractions(awsClient);
+	}
+
+	@Test
+	public void it_should_execute_setEndpoint_if_awsRegion_is_set() {
+		verify(awsClient).setEndpoint("https://cloudformation.region.amazonaws.com");
+	}
 
 	private DescribeStacksResult stackDeleteFailedResult() {
 		return describeStacksResultWithStatus(StackStatus.DELETE_FAILED);

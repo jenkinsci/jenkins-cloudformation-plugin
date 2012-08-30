@@ -66,6 +66,9 @@ public class CloudFormation {
 	 * @param timeout Time to wait for the creation of a stack to complete. This value will be the greater between {@link #MIN_TIMEOUT} and the given value.
 	 * @param awsAccessKey the AWS API Access Key.
 	 * @param awsSecretKey the AWS API Secret Key.
+	 * @param awsRegion the AWS Region.
+	 * @param autoDeleteStack
+	 * @param envVars
 	 */
 	public CloudFormation(PrintStream logger, String stackName,
 			String recipeBody, Map<String, String> parameters,
@@ -112,14 +115,6 @@ public class CloudFormation {
         return autoDeleteStack;
     }
 
-    /**
-     * Return AWS Region
-     */
-
-    public String getAwsRegion() {
-      return awsRegion;
-    }
-	
 	/**
 	 * @return
 	 */
