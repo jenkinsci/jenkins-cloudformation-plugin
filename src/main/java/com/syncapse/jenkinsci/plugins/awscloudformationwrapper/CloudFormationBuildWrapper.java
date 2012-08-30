@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
@@ -24,7 +24,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * @author erickdovale
- * 
  */
 public class CloudFormationBuildWrapper extends BuildWrapper {
 
@@ -39,7 +38,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
 	@Override
 	public void makeBuildVariables(AbstractBuild build,
-			Map<String, String> variables) {
+								   Map<String, String> variables) {
 
 		for (CloudFormation cf : cloudFormations) {
 			variables.putAll(cf.getOutputs());
@@ -49,13 +48,13 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
 	@Override
 	public Environment setUp(AbstractBuild build, Launcher launcher,
-			BuildListener listener) throws IOException, InterruptedException {
+							 BuildListener listener) throws IOException, InterruptedException {
 
-        EnvVars env = build.getEnvironment(listener);
-        env.overrideAll(build.getBuildVariables());
-        
-        boolean success = true;
-        
+		EnvVars env = build.getEnvironment(listener);
+		env.overrideAll(build.getBuildVariables());
+
+		boolean success = true;
+
 		for (StackBean stackBean : stacks) {
 
 			final CloudFormation cloudFormation = newCloudFormation(stackBean,
@@ -81,7 +80,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 			}
 
 		}
-		
+
 		// If any stack fails to create then destroy them all
 		if (!success) {
 			doTearDown();
@@ -94,31 +93,31 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 					throws IOException, InterruptedException {
 
 				return doTearDown();
-				
+
 			}
 
 		};
 	}
-	
-	protected boolean doTearDown() throws IOException, InterruptedException{
+
+	protected boolean doTearDown() throws IOException, InterruptedException {
 		boolean result = true;
 
 		List<CloudFormation> reverseOrder = new ArrayList<CloudFormation>(cloudFormations);
 		Collections.reverse(reverseOrder);
 
 		for (CloudFormation cf : reverseOrder) {
-            // automatically delete the stack?
-            if (cf.getAutoDeleteStack()) {
-                // delete the stack
-                result = result && cf.delete();
-            }
+			// automatically delete the stack?
+			if (cf.getAutoDeleteStack()) {
+				// delete the stack
+				result = result && cf.delete();
+			}
 		}
 
 		return result;
 	}
 
 	protected CloudFormation newCloudFormation(StackBean stackBean,
-			AbstractBuild<?, ?> build, EnvVars env, PrintStream logger)
+											   AbstractBuild<?, ?> build, EnvVars env, PrintStream logger)
 			throws IOException {
 
 		return new CloudFormation(logger, stackBean.getStackName(), build
@@ -126,7 +125,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 				.readToString(), stackBean.getParsedParameters(env),
 				stackBean.getTimeout(), stackBean.getParsedAwsAccessKey(env),
 				stackBean.getParsedAwsSecretKey(env),
-                stackBean.getParsedAwsRegion(env),
+				stackBean.getParsedAwsRegion(env),
 				stackBean.getAutoDeleteStack(), env);
 
 	}
@@ -158,5 +157,5 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 		cloudFormations = new ArrayList<CloudFormation>();
 		return this;
 	}
-	
+
 }

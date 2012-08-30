@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
@@ -32,12 +32,12 @@ import hudson.EnvVars;
 /**
  * Class for interacting with CloudFormation stacks, including creating them, deleting them and getting the outputs.
  * @author erickdovale
- * 
+ *
  */
 public class CloudFormation {
-	
+
 	/**
-	 * Minimum time to wait before considering the creation of the stack a failure. 
+	 * Minimum time to wait before considering the creation of the stack a failure.
 	 * Default value is 5 minutes. (300 seconds)
 	 */
 	public static final long MIN_TIMEOUT = 300;
@@ -90,8 +90,8 @@ public class CloudFormation {
 		}
 		this.logger = logger;
 		this.amazonClient = getAWSClient();
-        amazonClientSetEndPoint();
-        this.autoDeleteStack = autoDeleteStack;
+		amazonClientSetEndPoint();
+		this.autoDeleteStack = autoDeleteStack;
 		this.envVars = envVars;
 	}
 
@@ -120,13 +120,13 @@ public class CloudFormation {
 	 */
 	public boolean delete() {
 		logger.println("Deleting Cloud Formation stack: " + getExpandedStackName());
-		
+
 		DeleteStackRequest deleteStackRequest = new DeleteStackRequest();
 		deleteStackRequest.withStackName(getExpandedStackName());
-		
+
 		amazonClient.deleteStack(deleteStackRequest);
 		boolean result = waitForStackToBeDeleted();
-		
+
 		logger.println("Cloud Formation stack: " + getExpandedStackName()
 				+ (result ? " deleted successfully" : " failed deleting.") );
 		return result;
@@ -134,33 +134,33 @@ public class CloudFormation {
 
 	/**
 	 * @return True of the stack was created successfully. False otherwise.
-	 * 
+	 *
 	 * @throws TimeoutException if creating the stack takes longer than the timeout value passed during creation.
-	 * 
+	 *
 	 * @see CloudFormation#CloudFormation(PrintStream, String, String, Map, long, String, String)
 	 */
 	public boolean create() throws TimeoutException {
 
 		logger.println("Creating Cloud Formation stack: " + getExpandedStackName());
-		
+
 		CreateStackRequest request = createStackRequest();
-		
+
 		try {
 			amazonClient.createStack(request);
-			
+
 			stack = waitForStackToBeCreated();
-			
+
 			StackStatus status = getStackStatus(stack.getStackStatus());
-			
+
 			Map<String, String> stackOutput = new HashMap<String, String>();
 			if (isStackCreationSuccessful(status)){
 				List<Output> outputs = stack.getOutputs();
 				for (Output output : outputs){
 					stackOutput.put(output.getOutputKey(), output.getOutputValue());
 				}
-				
+
 				logger.println("Successfully created stack: " + getExpandedStackName());
-				
+
 				this.outputs = stackOutput;
 				return true;
 			} else{
@@ -176,7 +176,7 @@ public class CloudFormation {
 		}
 
 	}
-	
+
 	private String detailedError(AmazonServiceException e){
 		StringBuffer message = new StringBuffer();
 		message.append("Detailed Message: ").append(e.getMessage()).append('\n');
@@ -192,33 +192,33 @@ public class CloudFormation {
 				credentials);
 		return amazonClient;
 	}
-	
+
 	private boolean waitForStackToBeDeleted() {
-		
+
 		while (true){
-			
+
 			stack = getStack(amazonClient.describeStacks());
-			
+
 			if (stack == null) return true;
-			
+
 			StackStatus stackStatus = getStackStatus(stack.getStackStatus());
-			
+
 			if (StackStatus.DELETE_COMPLETE == stackStatus) return true;
-				
+
 			if (StackStatus.DELETE_FAILED == stackStatus) return false;
-			
+
 			sleep();
-			
+
 		}
-		
+
 	}
 
 	private List<Parameter> parameters(Map<String, String> parameters) {
-	
+
 		if (parameters == null || parameters.values().size() == 0) {
 			return null;
 		}
-	
+
 		List<Parameter> result = Lists.newArrayList();
 		Parameter parameter = null;
 		for (String name : parameters.keySet()) {
@@ -227,12 +227,12 @@ public class CloudFormation {
 			parameter.setParameterValue(parameters.get(name));
 			result.add(parameter);
 		}
-	
+
 		return result;
 	}
 
 	private Stack waitForStackToBeCreated() throws TimeoutException{
-		
+
 		DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(getExpandedStackName());
 		StackStatus status = StackStatus.CREATE_IN_PROGRESS;
 		Stack stack = null;
@@ -245,9 +245,9 @@ public class CloudFormation {
 			status = getStackStatus(stack.getStackStatus());
 			if (isStackCreationInProgress(status)) sleep();
 		}
-		
+
 		printStackEvents();
-		
+
 		return stack;
 	}
 
@@ -255,14 +255,14 @@ public class CloudFormation {
 		DescribeStackEventsRequest r = new DescribeStackEventsRequest();
 		r.withStackName(getExpandedStackName());
 		DescribeStackEventsResult describeStackEvents = amazonClient.describeStackEvents(r);
-		
+
 		List<StackEvent> stackEvents = describeStackEvents.getStackEvents();
 		Collections.reverse(stackEvents);
-		
+
 		for (StackEvent event : stackEvents) {
 			logger.println(event.getEventId() + " - " + event.getResourceType() + " - " + event.getResourceStatus() + " - " + event.getResourceStatusReason());
 		}
-		
+
 	}
 
 	private boolean isTimeout(long startTime) {
@@ -274,9 +274,9 @@ public class CloudFormation {
 			if (getExpandedStackName().equals(aStack.getStackName())){
 				return aStack;
 			}
-		
+
 		return null;
-		
+
 	}
 
 	private boolean isStackCreationSuccessful(StackStatus status) {
@@ -310,7 +310,7 @@ public class CloudFormation {
 		r.withParameters(parameters);
 		r.withTemplateBody(recipe);
 		r.withCapabilities("CAPABILITY_IAM");
-		
+
 		return r;
 	}
 

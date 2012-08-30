@@ -16,64 +16,61 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 /**
- * 
- * 
  * @author erickdovale
- *
  */
 public class StackBean extends AbstractDescribableImpl<StackBean> {
-	
+
 	/**
 	 * The name of the stack.
 	 */
 	private String stackName;
-	
+
 	/**
 	 * The description of the cloud formation stack that will be launched.
 	 */
 	private String description;
-	
+
 	/**
 	 * The json file with the Cloud Formation definition.
 	 */
 	private String cloudFormationRecipe;
-	
+
 	/**
 	 * The parameters to be passed into the cloud formation.
 	 */
 	private String parameters;
-	
+
 	/**
-	 * Time to wait for a stack to be created before giving up and failing the build. 
+	 * Time to wait for a stack to be created before giving up and failing the build.
 	 */
 	private long timeout;
-	
+
 	/**
 	 * The access key to call Amazon's APIs
 	 */
 	private String awsAccessKey;
-	
+
 	/**
 	 * The secret key to call Amazon's APIs
 	 */
 	private String awsSecretKey;
 
-    /**
-     * The region to launch Cloud Formation in.
-     */
-    private String awsRegion;
+	/**
+	 * The region to launch Cloud Formation in.
+	 */
+	private String awsRegion;
 
-    /**
-     * Whether or not the stack should be deleted automatically when the job completes
-     */
-    private boolean autoDeleteStack = true;
-	
+	/**
+	 * Whether or not the stack should be deleted automatically when the job completes
+	 */
+	private boolean autoDeleteStack = true;
+
 	@DataBoundConstructor
 	public StackBean(String stackName, String description,
-			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, String awsRegion,
-            boolean autoDeleteStack) {
-		
+					 String cloudFormationRecipe, String parameters, long timeout,
+					 String awsAccessKey, String awsSecretKey, String awsRegion,
+					 boolean autoDeleteStack) {
+
 		super();
 		this.stackName = stackName;
 		this.description = description;
@@ -82,8 +79,8 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		this.timeout = timeout;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
-        this.awsRegion = awsRegion;
-        this.autoDeleteStack = autoDeleteStack;
+		this.awsRegion = awsRegion;
+		this.autoDeleteStack = autoDeleteStack;
 	}
 
 	public String getStackName() {
@@ -118,20 +115,20 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		return awsRegion;
 	}
 
-    public boolean getAutoDeleteStack() {
-        return autoDeleteStack;
-    }
+	public boolean getAutoDeleteStack() {
+		return autoDeleteStack;
+	}
 
 	public Map<String, String> getParsedParameters(EnvVars env) {
-		
+
 		if (parameters == null || parameters.isEmpty())
 			return new HashMap<String, String>();
-		
+
 		Map<String, String> result = new HashMap<String, String>();
 		String token[] = null;
-		
+
 		//semicolon delimited list
-		if(parameters.contains(";")) {
+		if (parameters.contains(";")) {
 			for (String param : parameters.split(";")) {
 				token = param.split("=");
 				result.put(token[0].trim(), env.expand(token[1].trim()));
@@ -145,29 +142,29 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		}
 		return result;
 	}
-	
+
 	public String getParsedAwsAccessKey(EnvVars env) {
 		return env.expand(getAwsAccessKey());
 	}
 
-	
+
 	public String getParsedAwsSecretKey(EnvVars env) {
 		return env.expand(getAwsSecretKey());
 	}
 
-    public String getParsedAwsRegion(EnvVars env) {
-        return env.expand(getAwsRegion());
-    }
+	public String getParsedAwsRegion(EnvVars env) {
+		return env.expand(getAwsRegion());
+	}
 
 	@Extension
-	public static final class DescriptorImpl extends Descriptor<StackBean>{
-		
+	public static final class DescriptorImpl extends Descriptor<StackBean> {
+
 		@Override
 		public String getDisplayName() {
 			return "Cloud Formation";
 		}
-		
-        public FormValidation doCheckStackName(
+
+		public FormValidation doCheckStackName(
 				@AncestorInPath AbstractProject<?, ?> project,
 				@QueryParameter String value) throws IOException {
 			if (0 == value.length()) {
@@ -183,7 +180,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 				try {
 					Long.parseLong(value);
 				} catch (NumberFormatException e) {
-					return FormValidation.error("Timeout value "+ value + " is not a number.");
+					return FormValidation.error("Timeout value " + value + " is not a number.");
 				}
 			}
 			return FormValidation.ok();

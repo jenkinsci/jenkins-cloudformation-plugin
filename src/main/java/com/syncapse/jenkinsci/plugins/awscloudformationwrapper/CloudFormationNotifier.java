@@ -74,7 +74,7 @@ public class CloudFormationNotifier extends Notifier {
 					false,
 					envVars
 			);
-			if(cloudFormation.delete()) {
+			if (cloudFormation.delete()) {
 				LOGGER.info("Success");
 			} else {
 				LOGGER.warning("Failed");
