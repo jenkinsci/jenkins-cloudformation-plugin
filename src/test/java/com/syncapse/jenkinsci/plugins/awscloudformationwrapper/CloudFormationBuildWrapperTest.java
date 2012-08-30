@@ -77,15 +77,18 @@ public class CloudFormationBuildWrapperTest {
 	private void when_2_stack_are_entered() throws Exception {
 		List<StackBean> stackBeans = new ArrayList<StackBean>();
 		stackBeans.add(new StackBean("stack1", "stack description",
-				"{resources: }", "", 0, "accessKey", "secretKey", true));
+				"{resources: }", "", 0, "accessKey", "secretKey", "region", true));
 		stackBeans.add(new StackBean("stack2", "stack2 description",
-				"{resources: }", "", 0, "accessKey", "secretKey", true));
+				"{resources: }", "", 0, "accessKey", "secretKey", "region", true));
 
 		wrapper = spy(new CloudFormationBuildWrapper(stackBeans));
 
         when(mockCF1.getAutoDeleteStack()).thenReturn(true);
         when(mockCF2.getAutoDeleteStack()).thenReturn(true);
-		
+
+        when(mockCF1.getAwsRegion()).thenReturn("region");
+        when(mockCF2.getAwsRegion()).thenReturn("region");
+
 		doReturn(mockCF1).when(wrapper).newCloudFormation(
 				((StackBean)argThat(hasProperty("stackName", equalTo("stack1")))),
 				any(AbstractBuild.class), any(EnvVars.class),
@@ -108,7 +111,7 @@ public class CloudFormationBuildWrapperTest {
 	private void when_1_stack_is_entered() throws Exception {
 		List<StackBean> stackBeans = new ArrayList<StackBean>();
 		stackBeans.add(new StackBean("stack1", "stack description",
-				"{resources: }", "", 0, "accessKey", "secretKey", true));
+				"{resources: }", "", 0, "accessKey", "secretKey", "region", true));
 
 		wrapper = spy(new CloudFormationBuildWrapper(stackBeans));
 

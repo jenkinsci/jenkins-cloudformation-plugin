@@ -48,6 +48,7 @@ public class CloudFormation {
 	private long timeout;
 	private String awsAccessKey;
 	private String awsSecretKey;
+    private String awsRegion;
 	private PrintStream logger;
 	private AmazonCloudFormation amazonClient;
 	private Stack stack;
@@ -68,7 +69,7 @@ public class CloudFormation {
 	 */
 	public CloudFormation(PrintStream logger, String stackName,
 			String recipeBody, Map<String, String> parameters,
-			long timeout, String awsAccessKey, String awsSecretKey,
+			long timeout, String awsAccessKey, String awsSecretKey, String awsRegion,
             boolean autoDeleteStack, EnvVars envVars) {
 
 		this.stackName = stackName;
@@ -76,6 +77,7 @@ public class CloudFormation {
 		this.parameters = parameters(parameters);
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
+        this.awsRegion = awsRegion;
 		if (timeout == -12345){
 			this.timeout = 0; // Faster testing.
 			this.waitBetweenAttempts = 0;
@@ -97,6 +99,14 @@ public class CloudFormation {
      */
     public boolean getAutoDeleteStack() {
         return autoDeleteStack;
+    }
+
+    /**
+     * Return AWS Region
+     */
+
+    public String getAwsRegion() {
+      return awsRegion;
     }
 	
 	/**
@@ -174,6 +184,13 @@ public class CloudFormation {
 				this.awsSecretKey);
 		AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
 				credentials);
+        if (this.awsRegion != null) {
+          try {
+            amazonClient.setEndpoint("https://cloudformation." + this.awsRegion + ".amazonaws.com");
+          } catch (IllegalArgumentException e) {
+            logger.println("Failed to set region \"" + this.awsRegion + "\": " + getExpandedStackName() + ". Reason: " + e.getCause());
+          }
+        }
 		return amazonClient;
 	}
 	

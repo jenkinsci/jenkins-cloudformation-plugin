@@ -38,6 +38,7 @@ public class CloudFormationTest {
 	private Map<String, String> parameters = new HashMap<String, String>();
 	private String awsAccessKey = "accessKey";
 	private String awsSecretKey = "secretKey";
+    private String awsRegion = "region";
 
 	@Mock
 	private AmazonCloudFormation awsClient;
@@ -46,7 +47,7 @@ public class CloudFormationTest {
 	public void setup() throws Exception {
 
 		cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters,
-				-12345, awsAccessKey, awsSecretKey, true, new EnvVars()) {
+				-12345, awsAccessKey, awsSecretKey, awsRegion, true, new EnvVars()) {
 			@Override
 			protected AmazonCloudFormation getAWSClient() {
 				return awsClient;

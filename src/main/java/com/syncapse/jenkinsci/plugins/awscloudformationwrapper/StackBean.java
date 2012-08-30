@@ -59,6 +59,11 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 	private String awsSecretKey;
 
     /**
+     * The region to launch Cloud Formation in.
+     */
+    private String awsRegion;
+
+    /**
      * Whether or not the stack should be deleted automatically when the job completes
      */
     private boolean autoDeleteStack = true;
@@ -66,7 +71,8 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 	@DataBoundConstructor
 	public StackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack) {
+			String awsAccessKey, String awsSecretKey, String awsRegion,
+            boolean autoDeleteStack) {
 		
 		super();
 		this.stackName = stackName;
@@ -76,6 +82,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		this.timeout = timeout;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
+        this.awsRegion = awsRegion;
         this.autoDeleteStack = autoDeleteStack;
 	}
 
@@ -105,6 +112,10 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 
 	public String getAwsSecretKey() {
 		return awsSecretKey;
+	}
+
+	public String getAwsRegion() {
+		return awsRegion;
 	}
 
     public boolean getAutoDeleteStack() {
@@ -143,6 +154,10 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 	public String getParsedAwsSecretKey(EnvVars env) {
 		return env.expand(getAwsSecretKey());
 	}
+
+    public String getParsedAwsRegion(EnvVars env) {
+        return env.expand(getAwsRegion());
+    }
 
 	@Extension
 	public static final class DescriptorImpl extends Descriptor<StackBean>{
