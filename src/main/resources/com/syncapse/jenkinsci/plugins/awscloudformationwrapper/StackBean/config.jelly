@@ -21,7 +21,7 @@
 			<f:textbox />
 		</f:entry>
 		<f:entry title="AWS Secret Key" field="awsSecretKey">
-			<f:textbox />
+			<f:password />
 		</f:entry>
 		<f:entry title="AWS Region" field="awsRegion">
 			<f:textbox />
