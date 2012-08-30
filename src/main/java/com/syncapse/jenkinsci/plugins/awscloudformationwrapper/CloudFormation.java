@@ -87,9 +87,20 @@ public class CloudFormation {
 		}
 		this.logger = logger;
 		this.amazonClient = getAWSClient();
+        amazonClientSetEndPoint();
         this.autoDeleteStack = autoDeleteStack;
 		this.envVars = envVars;
 	}
+
+    protected void amazonClientSetEndPoint() {
+        if (this.awsRegion != null) {
+          try {
+            amazonClient.setEndpoint("https://cloudformation." + this.awsRegion + ".amazonaws.com");
+          } catch (IllegalArgumentException e) {
+            logger.println("Failed to set region \"" + this.awsRegion + "\": " + getExpandedStackName() + ". Reason: " + e.getCause());
+          }
+        }
+    }
 
     /**
      * Return true if this stack should be automatically deleted at the end of the job, or false if it should not
@@ -184,13 +195,6 @@ public class CloudFormation {
 				this.awsSecretKey);
 		AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
 				credentials);
-        if (this.awsRegion != null) {
-          try {
-            amazonClient.setEndpoint("https://cloudformation." + this.awsRegion + ".amazonaws.com");
-          } catch (IllegalArgumentException e) {
-            logger.println("Failed to set region \"" + this.awsRegion + "\": " + getExpandedStackName() + ". Reason: " + e.getCause());
-          }
-        }
 		return amazonClient;
 	}
 	

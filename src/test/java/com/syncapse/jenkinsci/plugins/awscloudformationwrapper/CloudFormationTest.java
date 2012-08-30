@@ -3,9 +3,7 @@ package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -98,6 +96,19 @@ public class CloudFormationTest {
 		when(awsClient.describeStacks()).thenReturn(stackDeleteFailedResult());
 		assertFalse(cf.delete());
 	}
+
+    @Test
+    public void it_should_not_execute_setEndpoint_if_awsRegion_is_not_set() {
+        when(cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters,
+				-12345, awsAccessKey, awsSecretKey, null, true, new EnvVars()) {
+			@Override
+			protected AmazonCloudFormation getAWSClient() {
+				return awsClient;
+			}
+		});
+        cf.amazonClientSetEndPoint();
+        verifyZeroInteractions(awsClient);
+    }
 
 	private DescribeStacksResult stackDeleteFailedResult() {
 		return describeStacksResultWithStatus(StackStatus.DELETE_FAILED);
