@@ -15,10 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 
- * 
  * @author erickdovale
- *
  */
 public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 
@@ -60,20 +57,20 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 		return env.expand(getAwsAccessKey());
 	}
 
-	
+
 	public String getParsedAwsSecretKey(EnvVars env) {
 		return env.expand(getAwsSecretKey());
 	}
 
 	@Extension
-	public static final class DescriptorImpl extends Descriptor<SimpleStackBean>{
-		
+	public static final class DescriptorImpl extends Descriptor<SimpleStackBean> {
+
 		@Override
 		public String getDisplayName() {
 			return "Cloud Formation";
 		}
-		
-        public FormValidation doCheckStackName(
+
+		public FormValidation doCheckStackName(
 				@AncestorInPath AbstractProject<?, ?> project,
 				@QueryParameter String value) throws IOException {
 			if (0 == value.length()) {

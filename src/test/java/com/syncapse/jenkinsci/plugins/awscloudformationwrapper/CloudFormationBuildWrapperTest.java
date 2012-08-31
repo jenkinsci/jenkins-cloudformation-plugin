@@ -10,6 +10,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.BuildListener;
@@ -31,11 +32,16 @@ public class CloudFormationBuildWrapperTest {
 
 	private CloudFormationBuildWrapper wrapper; // SUT
 
-	@Mock private CloudFormation mockCF1;
-	@Mock private CloudFormation mockCF2;
-	@Mock private AbstractBuild build;
-	@Mock private Launcher launcher;
-	@Mock private BuildListener listener;
+	@Mock
+	private CloudFormation mockCF1;
+	@Mock
+	private CloudFormation mockCF2;
+	@Mock
+	private AbstractBuild build;
+	@Mock
+	private Launcher launcher;
+	@Mock
+	private BuildListener listener;
 
 	private EnvVars envVars;
 
@@ -77,22 +83,22 @@ public class CloudFormationBuildWrapperTest {
 	private void when_2_stack_are_entered() throws Exception {
 		List<StackBean> stackBeans = new ArrayList<StackBean>();
 		stackBeans.add(new StackBean("stack1", "stack description",
-				"{resources: }", "", 0, "accessKey", "secretKey", true));
+				"{resources: }", "", 0, "accessKey", "secretKey", "region", true));
 		stackBeans.add(new StackBean("stack2", "stack2 description",
-				"{resources: }", "", 0, "accessKey", "secretKey", true));
+				"{resources: }", "", 0, "accessKey", "secretKey", "region", true));
 
 		wrapper = spy(new CloudFormationBuildWrapper(stackBeans));
 
-        when(mockCF1.getAutoDeleteStack()).thenReturn(true);
-        when(mockCF2.getAutoDeleteStack()).thenReturn(true);
-		
+		when(mockCF1.getAutoDeleteStack()).thenReturn(true);
+		when(mockCF2.getAutoDeleteStack()).thenReturn(true);
+
 		doReturn(mockCF1).when(wrapper).newCloudFormation(
-				((StackBean)argThat(hasProperty("stackName", equalTo("stack1")))),
+				((StackBean) argThat(hasProperty("stackName", equalTo("stack1")))),
 				any(AbstractBuild.class), any(EnvVars.class),
 				any(PrintStream.class));
 
 		doReturn(mockCF2).when(wrapper).newCloudFormation(
-				((StackBean)argThat(hasProperty("stackName", equalTo("stack2")))),
+				((StackBean) argThat(hasProperty("stackName", equalTo("stack2")))),
 				any(AbstractBuild.class), any(EnvVars.class),
 				any(PrintStream.class));
 
@@ -108,13 +114,13 @@ public class CloudFormationBuildWrapperTest {
 	private void when_1_stack_is_entered() throws Exception {
 		List<StackBean> stackBeans = new ArrayList<StackBean>();
 		stackBeans.add(new StackBean("stack1", "stack description",
-				"{resources: }", "", 0, "accessKey", "secretKey", true));
+				"{resources: }", "", 0, "accessKey", "secretKey", "region", true));
 
 		wrapper = spy(new CloudFormationBuildWrapper(stackBeans));
 
-        when(mockCF1.getAutoDeleteStack()).thenReturn(true);
+		when(mockCF1.getAutoDeleteStack()).thenReturn(true);
 
-        doReturn(mockCF1).when(wrapper).newCloudFormation(any(StackBean.class),
+		doReturn(mockCF1).when(wrapper).newCloudFormation(any(StackBean.class),
 				any(AbstractBuild.class), any(EnvVars.class),
 				any(PrintStream.class));
 

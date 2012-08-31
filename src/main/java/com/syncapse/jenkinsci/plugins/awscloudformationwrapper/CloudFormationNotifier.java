@@ -70,10 +70,11 @@ public class CloudFormationNotifier extends Notifier {
 					0,
 					stack.getAwsAccessKey(),
 					stack.getAwsSecretKey(),
+					null,
 					false,
 					envVars
 			);
-			if(cloudFormation.delete()) {
+			if (cloudFormation.delete()) {
 				LOGGER.info("Success");
 			} else {
 				LOGGER.warning("Failed");

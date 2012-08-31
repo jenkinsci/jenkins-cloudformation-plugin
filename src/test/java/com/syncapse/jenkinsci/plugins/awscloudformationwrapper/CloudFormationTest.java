@@ -1,15 +1,7 @@
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.HashMap;
-import java.util.Map;
-
+import com.amazonaws.services.cloudformation.AmazonCloudFormation;
+import com.amazonaws.services.cloudformation.model.*;
 import hudson.EnvVars;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,15 +9,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.amazonaws.services.cloudformation.AmazonCloudFormation;
-import com.amazonaws.services.cloudformation.model.CreateStackRequest;
-import com.amazonaws.services.cloudformation.model.CreateStackResult;
-import com.amazonaws.services.cloudformation.model.DescribeStackEventsRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStackEventsResult;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
-import com.amazonaws.services.cloudformation.model.Stack;
-import com.amazonaws.services.cloudformation.model.StackStatus;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CloudFormationTest {
@@ -38,6 +28,7 @@ public class CloudFormationTest {
 	private Map<String, String> parameters = new HashMap<String, String>();
 	private String awsAccessKey = "accessKey";
 	private String awsSecretKey = "secretKey";
+	private String awsRegion = "region";
 
 	@Mock
 	private AmazonCloudFormation awsClient;
@@ -46,7 +37,7 @@ public class CloudFormationTest {
 	public void setup() throws Exception {
 
 		cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters,
-				-12345, awsAccessKey, awsSecretKey, true, new EnvVars()) {
+				-12345, awsAccessKey, awsSecretKey, awsRegion, true, new EnvVars()) {
 			@Override
 			protected AmazonCloudFormation getAWSClient() {
 				return awsClient;
@@ -96,6 +87,41 @@ public class CloudFormationTest {
 			throws Exception {
 		when(awsClient.describeStacks()).thenReturn(stackDeleteFailedResult());
 		assertFalse(cf.delete());
+	}
+
+	@Test
+	public void it_should_not_execute_setEndpoint_if_awsRegion_is_not_set() {
+		final AmazonCloudFormation awsClient = mock(AmazonCloudFormation.class);
+
+		cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters,
+				-12345, awsAccessKey, awsSecretKey, null, true, new EnvVars()) {
+			@Override
+			protected AmazonCloudFormation getAWSClient() {
+				return awsClient;
+			}
+		};
+
+		verifyZeroInteractions(awsClient);
+	}
+
+	@Test
+	public void it_should_not_execute_setEndpoint_if_awsRegion_is_empty() {
+		final AmazonCloudFormation awsClient = mock(AmazonCloudFormation.class);
+
+		cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters,
+				-12345, awsAccessKey, awsSecretKey, "", true, new EnvVars()) {
+			@Override
+			protected AmazonCloudFormation getAWSClient() {
+				return awsClient;
+			}
+		};
+
+		verifyZeroInteractions(awsClient);
+	}
+
+	@Test
+	public void it_should_execute_setEndpoint_if_awsRegion_is_set() {
+		verify(awsClient).setEndpoint("https://cloudformation.region.amazonaws.com");
 	}
 
 	private DescribeStacksResult stackDeleteFailedResult() {

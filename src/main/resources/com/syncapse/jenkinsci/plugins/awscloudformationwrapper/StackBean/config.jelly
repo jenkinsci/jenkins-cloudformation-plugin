@@ -21,6 +21,9 @@
 			<f:textbox />
 		</f:entry>
 		<f:entry title="AWS Secret Key" field="awsSecretKey">
+			<f:password />
+		</f:entry>
+		<f:entry title="AWS Region" field="awsRegion">
 			<f:textbox />
 		</f:entry>
 		<f:entry title="Automatically delete the stack when the job completes"
