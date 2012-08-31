@@ -105,6 +105,21 @@ public class CloudFormationTest {
 	}
 
 	@Test
+	public void it_should_not_execute_setEndpoint_if_awsRegion_is_empty() {
+		final AmazonCloudFormation awsClient = mock(AmazonCloudFormation.class);
+
+		cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters,
+				-12345, awsAccessKey, awsSecretKey, "", true, new EnvVars()) {
+			@Override
+			protected AmazonCloudFormation getAWSClient() {
+				return awsClient;
+			}
+		};
+
+		verifyZeroInteractions(awsClient);
+	}
+
+	@Test
 	public void it_should_execute_setEndpoint_if_awsRegion_is_set() {
 		verify(awsClient).setEndpoint("https://cloudformation.region.amazonaws.com");
 	}

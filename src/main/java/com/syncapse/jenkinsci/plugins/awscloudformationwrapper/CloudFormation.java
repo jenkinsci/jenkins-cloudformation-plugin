@@ -96,7 +96,7 @@ public class CloudFormation {
 	}
 
     protected void amazonClientSetEndPoint() {
-        if (this.awsRegion != null) {
+        if (this.awsRegion != null && !this.awsRegion.isEmpty()) {
           try {
             amazonClient.setEndpoint("https://cloudformation." + this.awsRegion + ".amazonaws.com");
           } catch (IllegalArgumentException e) {
