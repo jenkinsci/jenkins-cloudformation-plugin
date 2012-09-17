@@ -68,8 +68,8 @@ public class CloudFormationNotifier extends Notifier {
 					"",
 					new HashMap<String, String>(),
 					0,
-					stack.getAwsAccessKey(),
-					stack.getAwsSecretKey(),
+					stack.getParsedAwsAccessKey(envVars),
+					stack.getParsedAwsSecretKey(envVars),
 					false,
 					envVars
 			);
