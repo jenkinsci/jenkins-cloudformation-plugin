@@ -46,7 +46,7 @@ public class CloudFormationTest {
 	public void setup() throws Exception {
 
 		cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters,
-				-12345, awsAccessKey, awsSecretKey, true, new EnvVars()) {
+				-12345, awsAccessKey, awsSecretKey, true, 0,new EnvVars()) {
 			@Override
 			protected AmazonCloudFormation getAWSClient() {
 				return awsClient;

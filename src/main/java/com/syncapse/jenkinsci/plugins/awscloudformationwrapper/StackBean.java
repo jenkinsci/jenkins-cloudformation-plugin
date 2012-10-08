@@ -62,11 +62,16 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
      * Whether or not the stack should be deleted automatically when the job completes
      */
     private boolean autoDeleteStack = true;
+
+    /**
+     * Whether or not the stack should try to recreate on error
+     */
+    private int retryOnError= 0;
 	
 	@DataBoundConstructor
 	public StackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack) {
+			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack, int retryOnError) {
 		
 		super();
 		this.stackName = stackName;
@@ -77,6 +82,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
         this.autoDeleteStack = autoDeleteStack;
+        this.retryOnError = retryOnError;
 	}
 
 	public String getStackName() {
@@ -109,6 +115,10 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 
     public boolean getAutoDeleteStack() {
         return autoDeleteStack;
+    }
+
+    public int getRetryOnError() {
+        return retryOnError;
     }
 
 	public Map<String, String> getParsedParameters(EnvVars env) {
