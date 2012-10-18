@@ -76,9 +76,9 @@ public class CloudFormationBuildWrapperTest {
 
 	private void when_2_stack_are_entered() throws Exception {
 		List<StackBean> stackBeans = new ArrayList<StackBean>();
-		stackBeans.add(new StackBean("stack1", "stack description",
+		stackBeans.add(new StackBean("ep1", "stack1", "stack description",
 				"{resources: }", "", 0, "accessKey", "secretKey", true));
-		stackBeans.add(new StackBean("stack2", "stack2 description",
+		stackBeans.add(new StackBean("ep1", "stack2", "stack2 description",
 				"{resources: }", "", 0, "accessKey", "secretKey", true));
 
 		wrapper = spy(new CloudFormationBuildWrapper(stackBeans));
@@ -107,7 +107,7 @@ public class CloudFormationBuildWrapperTest {
 
 	private void when_1_stack_is_entered() throws Exception {
 		List<StackBean> stackBeans = new ArrayList<StackBean>();
-		stackBeans.add(new StackBean("stack1", "stack description",
+		stackBeans.add(new StackBean("ep1", "stack1", "stack description",
 				"{resources: }", "", 0, "accessKey", "secretKey", true));
 
 		wrapper = spy(new CloudFormationBuildWrapper(stackBeans));

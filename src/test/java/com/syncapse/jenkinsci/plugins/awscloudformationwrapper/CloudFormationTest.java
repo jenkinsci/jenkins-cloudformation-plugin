@@ -31,8 +31,9 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 public class CloudFormationTest {
 
 	private static final String TEST_STACK = "testStack";
+    private static final String ENDPOINT = "ep1";
 
-	private CloudFormation cf; // SUT
+    private CloudFormation cf; // SUT
 
 	private String recipeBody = "recipe body";
 	private Map<String, String> parameters = new HashMap<String, String>();
@@ -45,7 +46,7 @@ public class CloudFormationTest {
 	@Before
 	public void setup() throws Exception {
 
-		cf = new CloudFormation(System.out, TEST_STACK, recipeBody, parameters,
+		cf = new CloudFormation(System.out, TEST_STACK, ENDPOINT, recipeBody, parameters,
 				-12345, awsAccessKey, awsSecretKey, true, new EnvVars()) {
 			@Override
 			protected AmazonCloudFormation getAWSClient() {

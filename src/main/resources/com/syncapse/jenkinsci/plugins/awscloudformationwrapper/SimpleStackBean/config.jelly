@@ -5,6 +5,9 @@
 		<f:entry title="Stack name" field="stackName">
 			<f:textbox />
 		</f:entry>
+		<f:entry title="AWS Endpoint" field="awsEndpoint">
+			<f:textbox />
+		</f:entry>
 		<f:entry title="AWS Access Key" field="awsAccessKey">
 			<f:textbox />
 		</f:entry>

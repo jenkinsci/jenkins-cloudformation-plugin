@@ -27,7 +27,12 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 	 */
 	private String stackName;
 
-	/**
+    /**
+     * The URL of the AWS endpoint
+     */
+    private String awsEndpoint;
+
+    /**
 	 * The access key to call Amazon's APIs
 	 */
 	private String awsAccessKey;
@@ -37,18 +42,23 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 	 */
 	private String awsSecretKey;
 
-	@DataBoundConstructor
-	public SimpleStackBean(String stackName, String awsAccessKey, String awsSecretKey) {
-		this.stackName = stackName;
-		this.awsAccessKey = awsAccessKey;
-		this.awsSecretKey = awsSecretKey;
-	}
+    @DataBoundConstructor
+    public SimpleStackBean(String stackName, String awsEndpoint, String awsAccessKey, String awsSecretKey) {
+        this.stackName = stackName;
+        this.awsEndpoint = awsEndpoint;
+        this.awsAccessKey = awsAccessKey;
+        this.awsSecretKey = awsSecretKey;
+    }
 
-	public String getStackName() {
+    public String getStackName() {
 		return stackName;
 	}
 
-	public String getAwsAccessKey() {
+    public String getAwsEndpoint() {
+        return awsEndpoint;
+    }
+
+    public String getAwsAccessKey() {
 		return awsAccessKey;
 	}
 

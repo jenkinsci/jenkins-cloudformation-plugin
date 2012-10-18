@@ -43,7 +43,8 @@ public class CloudFormation {
 	public static final long MIN_TIMEOUT = 300;
 
 	private String stackName;
-	private String recipe;
+    private String awsEndpoint;
+    private String recipe;
 	private List<Parameter> parameters;
 	private long timeout;
 	private String awsAccessKey;
@@ -67,12 +68,14 @@ public class CloudFormation {
 	 * @param awsSecretKey the AWS API Secret Key.
 	 */
 	public CloudFormation(PrintStream logger, String stackName,
-			String recipeBody, Map<String, String> parameters,
+            String awsEndpoint,
+            String recipeBody, Map<String, String> parameters,
 			long timeout, String awsAccessKey, String awsSecretKey,
             boolean autoDeleteStack, EnvVars envVars) {
 
 		this.stackName = stackName;
-		this.recipe = recipeBody;
+        this.awsEndpoint = awsEndpoint;
+        this.recipe = recipeBody;
 		this.parameters = parameters(parameters);
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
@@ -174,7 +177,8 @@ public class CloudFormation {
 				this.awsSecretKey);
 		AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
 				credentials);
-		return amazonClient;
+        amazonClient.setEndpoint(this.awsEndpoint);
+        return amazonClient;
 	}
 	
 	private boolean waitForStackToBeDeleted() {
