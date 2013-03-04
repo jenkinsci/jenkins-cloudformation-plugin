@@ -6,6 +6,7 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -62,12 +63,13 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
      * Whether or not the stack should be deleted automatically when the job completes
      */
     private boolean autoDeleteStack = true;
+    
+    private Region awsRegion;
 	
 	@DataBoundConstructor
 	public StackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack) {
-		
+			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack, Region awsRegion) {
 		super();
 		this.stackName = stackName;
 		this.description = description;
@@ -77,6 +79,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
         this.autoDeleteStack = autoDeleteStack;
+        this.awsRegion = awsRegion;
 	}
 
 	public String getStackName() {
@@ -109,6 +112,10 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 
     public boolean getAutoDeleteStack() {
         return autoDeleteStack;
+    }
+    
+    public Region getAwsRegion(){
+    	return awsRegion;
     }
 
 	public Map<String, String> getParsedParameters(EnvVars env) {
@@ -200,6 +207,14 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 			}
 			return FormValidation.ok();
 		}
+		
+		public ListBoxModel doFillAwsRegionItems() {
+            ListBoxModel items = new ListBoxModel();
+            for (Region region : Region.values()) {
+				items.add(region.readableName, region.name());
+			}
+            return items;
+        }
 
 	}
 

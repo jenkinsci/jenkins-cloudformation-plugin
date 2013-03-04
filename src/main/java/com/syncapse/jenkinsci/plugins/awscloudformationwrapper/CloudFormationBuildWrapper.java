@@ -126,7 +126,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 				.readToString(), stackBean.getParsedParameters(env),
 				stackBean.getTimeout(), stackBean.getParsedAwsAccessKey(env),
 				stackBean.getParsedAwsSecretKey(env),
-				stackBean.getAutoDeleteStack(), env);
+				stackBean.getAwsRegion(), stackBean.getAutoDeleteStack(), env);
 
 	}
 
@@ -142,7 +142,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 		public boolean isApplicable(AbstractProject<?, ?> item) {
 			return true;
 		}
-
+		
 	}
 
 	public List<StackBean> getStacks() {

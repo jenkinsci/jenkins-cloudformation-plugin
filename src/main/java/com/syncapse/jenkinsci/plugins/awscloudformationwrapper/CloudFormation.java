@@ -54,6 +54,7 @@ public class CloudFormation {
 	private long waitBetweenAttempts;
     private boolean autoDeleteStack;
 	private EnvVars envVars;
+	private Region awsRegion;
 
 	private Map<String, String> outputs;
 
@@ -68,14 +69,16 @@ public class CloudFormation {
 	 */
 	public CloudFormation(PrintStream logger, String stackName,
 			String recipeBody, Map<String, String> parameters,
-			long timeout, String awsAccessKey, String awsSecretKey,
+			long timeout, String awsAccessKey, String awsSecretKey, Region region, 
             boolean autoDeleteStack, EnvVars envVars) {
 
+		this.logger = logger;
 		this.stackName = stackName;
 		this.recipe = recipeBody;
 		this.parameters = parameters(parameters);
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
+		this.awsRegion = region != null ? region : Region.getDefault();
 		if (timeout == -12345){
 			this.timeout = 0; // Faster testing.
 			this.waitBetweenAttempts = 0;
@@ -83,13 +86,20 @@ public class CloudFormation {
 			this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
 			this.waitBetweenAttempts = 10; // query every 10s
 		}
-		this.logger = logger;
 		this.amazonClient = getAWSClient();
         this.autoDeleteStack = autoDeleteStack;
 		this.envVars = envVars;
 	}
 
-    /**
+	public CloudFormation(PrintStream logger, String stackName,
+			String recipeBody, Map<String, String> parameters, long timeout,
+			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack,
+			EnvVars envVars) {
+		this(logger, stackName, recipeBody, parameters, timeout, awsAccessKey,
+				awsSecretKey, null, autoDeleteStack, envVars);
+	}
+
+	/**
      * Return true if this stack should be automatically deleted at the end of the job, or false if it should not
      * be automatically deleted.
      * @return true if this stack should be automatically deleted at the end of the job, or false if it should not
@@ -174,6 +184,7 @@ public class CloudFormation {
 				this.awsSecretKey);
 		AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
 				credentials);
+		amazonClient.setEndpoint(awsRegion.endPoint);
 		return amazonClient;
 	}
 	

@@ -6,19 +6,19 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+
+import java.io.IOException;
+
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 
  * 
  * @author erickdovale
- *
+ * 
  */
 public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 
@@ -37,11 +37,18 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 	 */
 	private String awsSecretKey;
 
+	/**
+	 * The AWS Region to work against.
+	 */
+	private Region awsRegion;
+
 	@DataBoundConstructor
-	public SimpleStackBean(String stackName, String awsAccessKey, String awsSecretKey) {
+	public SimpleStackBean(String stackName, String awsAccessKey,
+			String awsSecretKey, Region awsRegion) {
 		this.stackName = stackName;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
+		this.awsRegion = awsRegion != null ? awsRegion : Region.getDefault();
 	}
 
 	public String getStackName() {
@@ -60,20 +67,24 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 		return env.expand(getAwsAccessKey());
 	}
 
-	
 	public String getParsedAwsSecretKey(EnvVars env) {
 		return env.expand(getAwsSecretKey());
 	}
 
+	public Region getAwsRegion() {
+		return awsRegion;
+	}
+
 	@Extension
-	public static final class DescriptorImpl extends Descriptor<SimpleStackBean>{
-		
+	public static final class DescriptorImpl extends
+			Descriptor<SimpleStackBean> {
+
 		@Override
 		public String getDisplayName() {
 			return "Cloud Formation";
 		}
-		
-        public FormValidation doCheckStackName(
+
+		public FormValidation doCheckStackName(
 				@AncestorInPath AbstractProject<?, ?> project,
 				@QueryParameter String value) throws IOException {
 			if (0 == value.length()) {
@@ -100,7 +111,14 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 			return FormValidation.ok();
 		}
 
-	}
+		public ListBoxModel doFillAwsRegionItems() {
+			ListBoxModel items = new ListBoxModel();
+			for (Region region : Region.values()) {
+				items.add(region.readableName, region.name());
+			}
+			return items;
+		}
 
+	}
 
 }
