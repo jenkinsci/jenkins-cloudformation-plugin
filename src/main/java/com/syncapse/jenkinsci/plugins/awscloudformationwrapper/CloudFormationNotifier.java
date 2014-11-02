@@ -1,5 +1,6 @@
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
+import com.google.common.collect.ImmutableList;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -45,6 +46,7 @@ public class CloudFormationNotifier extends Notifier {
 		return super.prebuild(build, listener);
 	}
 
+       
 	@Override
 	public Action getProjectAction(AbstractProject<?, ?> project) {
 		LOGGER.info("getProjectAction");
@@ -56,7 +58,7 @@ public class CloudFormationNotifier extends Notifier {
 		LOGGER.info("getProjectActions");
 		return super.getProjectActions(project);
 	}
-
+  
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		EnvVars envVars = build.getEnvironment(listener);
@@ -72,7 +74,8 @@ public class CloudFormationNotifier extends Notifier {
 					stack.getParsedAwsSecretKey(envVars),
 					stack.getAwsRegion(),
 					false,
-					envVars
+					envVars,
+                                stack.getIsPrefixSelected()
 			);
 			if(cloudFormation.delete()) {
 				LOGGER.info("Success");
@@ -104,5 +107,6 @@ public class CloudFormationNotifier extends Notifier {
 			return true;
 		}
 	}
+      
 }
 

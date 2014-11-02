@@ -4,6 +4,7 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.AbstractProject;
+import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -41,14 +42,18 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 	 * The AWS Region to work against.
 	 */
 	private Region awsRegion;
-
+        
+        private Boolean isPrefixSelected;
+ 
 	@DataBoundConstructor
 	public SimpleStackBean(String stackName, String awsAccessKey,
-			String awsSecretKey, Region awsRegion) {
+			String awsSecretKey, Region awsRegion,Boolean isPrefixSelected) {
 		this.stackName = stackName;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
 		this.awsRegion = awsRegion != null ? awsRegion : Region.getDefault();
+                this.isPrefixSelected=isPrefixSelected;
+          
 	}
 
 	public String getStackName() {
@@ -61,6 +66,9 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 
 	public String getAwsSecretKey() {
 		return awsSecretKey;
+	}
+       public Boolean getIsPrefixSelected() {
+		return isPrefixSelected;
 	}
 
 	public String getParsedAwsAccessKey(EnvVars env) {
