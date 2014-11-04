@@ -66,6 +66,7 @@ public class CloudFormation {
     private EnvVars envVars;
     private Region awsRegion;
     private Boolean isPrefixSelected;
+    private Boolean isTagFilterOn;
     private Map<String, String> outputs;
 
     /**
@@ -84,7 +85,7 @@ public class CloudFormation {
     public CloudFormation(PrintStream logger, String stackName,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
-            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected) {
+            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected,Boolean isTagFilterOn) {
 
         this.logger = logger;
         this.stackName = stackName;
@@ -104,14 +105,15 @@ public class CloudFormation {
         this.amazonClient = getAWSClient();
         this.autoDeleteStack = autoDeleteStack;
         this.envVars = envVars;
+        this.isTagFilterOn=isTagFilterOn;
     }
 
     public CloudFormation(PrintStream logger, String stackName,
             String recipeBody, Map<String, String> parameters, long timeout,
             String awsAccessKey, String awsSecretKey, boolean autoDeleteStack,
-            EnvVars envVars, Boolean isPrefixSelected) {
+            EnvVars envVars, Boolean isPrefixSelected,Boolean isTagFilterOn) {
         this(logger, stackName, recipeBody, parameters, timeout, awsAccessKey,
-                awsSecretKey, null, autoDeleteStack, envVars, isPrefixSelected);
+                awsSecretKey, null, autoDeleteStack, envVars, isPrefixSelected,isTagFilterOn);
     }
 
     /**

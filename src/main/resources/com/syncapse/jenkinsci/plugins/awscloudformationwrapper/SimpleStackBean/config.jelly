@@ -12,8 +12,6 @@
         <f:entry title="prefix" field="isPrefixSelected">
             <f:checkbox/>
         </f:entry>
-             <f:block>
-   </f:block>
         <f:entry title="AWS Access Key" field="awsAccessKey">
             <f:textbox />
         </f:entry>
@@ -21,7 +19,6 @@
             <f:textbox />
         </f:entry>
 
-         
         <f:entry>
             <f:repeatableDeleteButton />
         </f:entry>
