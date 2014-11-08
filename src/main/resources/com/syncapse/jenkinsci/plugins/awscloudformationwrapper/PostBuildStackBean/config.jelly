@@ -26,9 +26,8 @@
 		<f:entry title="AWS Secret Key" field="awsSecretKey">
 			<f:textbox />
 		</f:entry>
-		<f:entry title="Automatically delete the stack when the job completes" 
-			field="autoDeleteStack"  >
-			<f:checkbox default="true"  />
+                <f:entry title="Sleep Time (seconds)" field="sleep" value="0">
+			<f:textbox />
 		</f:entry>
 	     <f:entry title="">
           <div align="right">
