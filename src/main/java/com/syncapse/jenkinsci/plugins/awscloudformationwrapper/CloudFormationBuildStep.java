@@ -14,6 +14,7 @@ import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Builder;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import java.io.IOException;
@@ -28,12 +29,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
  *
  * @author amit.gilad
  */
-public class CloudFormationPostBuildNotifier extends Notifier{
-    	private static final Logger LOGGER = Logger.getLogger(CloudFormationPostBuildNotifier.class.getName());
+public class CloudFormationBuildStep extends Builder{
+    	private static final Logger LOGGER = Logger.getLogger(CloudFormationBuildStep.class.getName());
 	private final List<PostBuildStackBean> stacks;
 
 	@DataBoundConstructor
-	public CloudFormationPostBuildNotifier(List<PostBuildStackBean> stacks) {
+	public CloudFormationBuildStep(List<PostBuildStackBean> stacks) {
 		this.stacks = stacks;
 	}
 
@@ -113,9 +114,9 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 	}
 
 	@Extension
-	public static final CloudFormationPostBuildNotifier.DescriptorImpl DESCRIPTOR = new CloudFormationPostBuildNotifier.DescriptorImpl();
+	public static final CloudFormationBuildStep.DescriptorImpl DESCRIPTOR = new CloudFormationBuildStep.DescriptorImpl();
 
-	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+	public static class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
 		@Override
 		public String getDisplayName() {

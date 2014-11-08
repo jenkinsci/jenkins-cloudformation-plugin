@@ -35,6 +35,7 @@ import hudson.EnvVars;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class for interacting with CloudFormation stacks, including creating them,
@@ -68,6 +69,7 @@ public class CloudFormation {
     private Boolean isPrefixSelected;
     private Boolean isTagFilterOn;
     private Map<String, String> outputs;
+    private long sleep=0;
 
     /**
      * @param logger a logger to write progress information.
@@ -85,7 +87,33 @@ public class CloudFormation {
     public CloudFormation(PrintStream logger, String stackName,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
-            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected,Boolean isTagFilterOn) {
+            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected) {
+
+        this.logger = logger;
+        this.stackName = stackName;
+        this.recipe = recipeBody;
+        this.parameters = parameters(parameters);
+        this.awsAccessKey = awsAccessKey;
+        this.awsSecretKey = awsSecretKey;
+        this.awsRegion = region != null ? region : Region.getDefault();
+        this.isPrefixSelected = isPrefixSelected;
+        
+        if (timeout == -12345) {
+            this.timeout = 0; // Faster testing.
+            this.waitBetweenAttempts = 0;
+        } else {
+            this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
+            this.waitBetweenAttempts = 10; // query every 10s
+        }
+        this.amazonClient = getAWSClient();
+        this.autoDeleteStack = autoDeleteStack;
+        this.envVars = envVars;
+    
+    }
+    public CloudFormation(PrintStream logger, String stackName,
+            String recipeBody, Map<String, String> parameters,
+            long timeout, String awsAccessKey, String awsSecretKey, Region region,
+            EnvVars envVars, Boolean isPrefixSelected,long sleep) {
 
         this.logger = logger;
         this.stackName = stackName;
@@ -103,17 +131,17 @@ public class CloudFormation {
             this.waitBetweenAttempts = 10; // query every 10s
         }
         this.amazonClient = getAWSClient();
-        this.autoDeleteStack = autoDeleteStack;
+        this.autoDeleteStack = false;
         this.envVars = envVars;
-        this.isTagFilterOn=isTagFilterOn;
+        this.sleep=sleep;
+    
     }
-
     public CloudFormation(PrintStream logger, String stackName,
             String recipeBody, Map<String, String> parameters, long timeout,
             String awsAccessKey, String awsSecretKey, boolean autoDeleteStack,
-            EnvVars envVars, Boolean isPrefixSelected,Boolean isTagFilterOn) {
+            EnvVars envVars, Boolean isPrefixSelected) {
         this(logger, stackName, recipeBody, parameters, timeout, awsAccessKey,
-                awsSecretKey, null, autoDeleteStack, envVars, isPrefixSelected,isTagFilterOn);
+                awsSecretKey, null, autoDeleteStack, envVars, isPrefixSelected);
     }
 
     /**
@@ -154,7 +182,7 @@ public class CloudFormation {
      * @see CloudFormation#CloudFormation(PrintStream, String, String, Map,
      * long, String, String)
      */
-    public boolean create() throws TimeoutException {
+    public boolean create() throws TimeoutException, InterruptedException {
 
         logger.println("Creating Cloud Formation stack: " + getExpandedStackName());
 
@@ -175,8 +203,8 @@ public class CloudFormation {
                 }
 
                 logger.println("Successfully created stack: " + getExpandedStackName());
-
                 this.outputs = stackOutput;
+                Thread.sleep(TimeUnit.SECONDS.toMillis(sleep));
                 return true;
             } else {
                 logger.println("Failed to create stack: " + getExpandedStackName() + ". Reason: " + stack.getStackStatusReason());

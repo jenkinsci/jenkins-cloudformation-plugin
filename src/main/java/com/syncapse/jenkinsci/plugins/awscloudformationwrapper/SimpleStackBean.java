@@ -45,17 +45,17 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
         
         private Boolean isPrefixSelected;
         
-        private Boolean isTagFilterOn;
+       
  
 	@DataBoundConstructor
 	public SimpleStackBean(String stackName, String awsAccessKey,
-			String awsSecretKey, Region awsRegion,Boolean isPrefixSelected,Boolean isTagFilterOn) {
+			String awsSecretKey, Region awsRegion,Boolean isPrefixSelected) {
 		this.stackName = stackName;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
 		this.awsRegion = awsRegion != null ? awsRegion : Region.getDefault();
                 this.isPrefixSelected=isPrefixSelected;
-                this.isTagFilterOn=isTagFilterOn;
+                
           
 	}
 
@@ -86,9 +86,7 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 		return awsRegion;
 	}
 
-        public Boolean getIsTagFilterOn(){
-            return isTagFilterOn;
-        }
+
 	@Extension
 	public static final class DescriptorImpl extends
 			Descriptor<SimpleStackBean> {

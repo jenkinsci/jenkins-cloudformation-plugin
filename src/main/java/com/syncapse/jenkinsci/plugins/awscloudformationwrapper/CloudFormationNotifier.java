@@ -75,7 +75,7 @@ public class CloudFormationNotifier extends Notifier {
 					stack.getAwsRegion(),
 					false,
 					envVars,
-                                stack.getIsPrefixSelected(),stack.getIsTagFilterOn()
+                                stack.getIsPrefixSelected()
 			);
 			if(cloudFormation.delete()) {
 				LOGGER.info("Success");
