@@ -12,7 +12,7 @@
 	<packaging>hpi</packaging>
 
 	<artifactId>jenkins-cloudformation-plugin</artifactId>
-	<version>0.12-SNAPSHOT</version>
+	<version>0.13-SNAPSHOT</version>
 	
 	<url>https://wiki.jenkins-ci.org/display/JENKINS/AWS+Cloudformation+Plugin</url>
 
