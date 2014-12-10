@@ -5,6 +5,7 @@ public enum Region {
 	US_WEST_Oregon("US West (Oregon) Region", "cloudformation.us-west-2.amazonaws.com"),
 	US_WEST_Northern_California("US West (Northern California) Region", "cloudformation.us-west-1.amazonaws.com"),
 	EU_Ireland("EU (Ireland) Region", "cloudformation.eu-west-1.amazonaws.com"),
+	EU_Frankfurt("EU (Frankfurt) Region", "cloudformation.eu-central-1.amazonaws.com"),
 	Asia_Pacific_Singapore("Asia Pacific (Singapore) Region", "cloudformation.ap-southeast-1.amazonaws.com"),
 	Asia_Pacific_Sydney("Asia Pacific (Sydney) Region", "cloudformation.ap-southeast-2.amazonaws.com"),
 	Asia_Pacific_Tokyo("Asia Pacific (Tokyo) Region", "cloudformation.ap-northeast-1.amazonaws.com"),
