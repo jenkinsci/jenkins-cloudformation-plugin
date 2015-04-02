@@ -241,23 +241,29 @@ public class CloudFormation {
     private boolean waitForStackToBeDeleted() {
 
         while (true) {
+            try {
 
-            stack = getStack(amazonClient.describeStacks());
+              stack = getStack(amazonClient.describeStacks());
 
-            if (stack == null) {
-                return true;
+              if (stack == null) {
+                  return true;
+              }
+
+              StackStatus stackStatus = getStackStatus(stack.getStackStatus());
+
+              if (StackStatus.DELETE_COMPLETE == stackStatus) {
+                  return true;
+              }
+
+              if (StackStatus.DELETE_FAILED == stackStatus) {
+                  return false;
+              }
+
+            } catch (AmazonServiceException ase) {
+                if (!RetryUtils.isThrottlingException(ase)) {
+                    throw ase;
+                }
             }
-
-            StackStatus stackStatus = getStackStatus(stack.getStackStatus());
-
-            if (StackStatus.DELETE_COMPLETE == stackStatus) {
-                return true;
-            }
-
-            if (StackStatus.DELETE_FAILED == stackStatus) {
-                return false;
-            }
-
             sleep();
 
         }
