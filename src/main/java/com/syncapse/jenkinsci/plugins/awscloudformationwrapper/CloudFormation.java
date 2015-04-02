@@ -13,6 +13,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.retry.RetryUtils;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationAsyncClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -295,9 +296,16 @@ public class CloudFormation {
             if (isTimeout(startTime)) {
                 throw new TimeoutException("Timed out waiting for stack to be created. (timeout=" + timeout + ")");
             }
-            stack = getStack(amazonClient.describeStacks(describeStacksRequest));
-            status = getStackStatus(stack.getStackStatus());
-            if (isStackCreationInProgress(status)) {
+            try {
+                stack = getStack(amazonClient.describeStacks(describeStacksRequest));
+                status = getStackStatus(stack.getStackStatus());
+                if (isStackCreationInProgress(status)) {
+                    sleep();
+                }
+            } catch (AmazonServiceException ase) {
+                if (!RetryUtils.isThrottlingException(ase)) {
+                    throw ase;
+                }
                 sleep();
             }
         }
