@@ -11,8 +11,12 @@ import java.util.Map;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.internal.StaticCredentialsProvider; 
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationAsyncClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -30,12 +34,20 @@ import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackEvent;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.cloudformation.model.StackSummary;
+
 import com.google.common.collect.Lists;
+
+import jenkins.model.Jenkins;
+import hudson.ProxyConfiguration;
 import hudson.EnvVars;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 
 /**
  * Class for interacting with CloudFormation stacks, including creating them,
@@ -70,6 +82,8 @@ public class CloudFormation {
     private Boolean isTagFilterOn;
     private Map<String, String> outputs;
     private long sleep=0;
+
+    private static AWSCredentialsProvider awsCredentialsProvider;
 
     /**
      * @param logger a logger to write progress information.
@@ -198,7 +212,7 @@ public class CloudFormation {
             Map<String, String> stackOutput = new HashMap<String, String>();
             if (isStackCreationSuccessful(status)) {
                 List<Output> outputs = stack.getOutputs();
-                for (Output output : outputs) {
+               for (Output output : outputs) {
                     stackOutput.put(output.getOutputKey(), output.getOutputValue());
                 }
 
@@ -228,11 +242,33 @@ public class CloudFormation {
         return message.toString();
     }
 
+    private AWSCredentialsProvider createCredentialsProvider() {
+        return createCredentialsProvider(awsAccessKey, awsSecretKey);
+    }
+
+    public static AWSCredentialsProvider createCredentialsProvider(final String awsAccessKey, final String awsSecretKey) {
+        BasicAWSCredentials credentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey);
+        return new StaticCredentialsProvider(credentials);
+    }
+
     protected AmazonCloudFormation getAWSClient() {
-        AWSCredentials credentials = new BasicAWSCredentials(this.awsAccessKey,
-                this.awsSecretKey);
-        AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
-                credentials);
+        awsCredentialsProvider = createCredentialsProvider(); 
+        ClientConfiguration config = new ClientConfiguration();
+        config.setSignerOverride("QueryStringSignerType");
+        ProxyConfiguration proxyConfig = Jenkins.getInstance().proxy;
+
+        Proxy proxy = proxyConfig == null ? Proxy.NO_PROXY : proxyConfig.createProxy(awsRegion.endPoint);
+        if (! proxy.equals(Proxy.NO_PROXY) && proxy.address() instanceof InetSocketAddress) {
+            InetSocketAddress address = (InetSocketAddress) proxy.address();
+            config.setProxyHost(address.getHostName());
+            config.setProxyPort(address.getPort());
+            if(null != proxyConfig.getUserName()) {
+                config.setProxyUsername(proxyConfig.getUserName());
+                config.setProxyPassword(proxyConfig.getPassword());
+            }
+        }
+
+        AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(awsCredentialsProvider, config);
         amazonClient.setEndpoint(awsRegion.endPoint);
         return amazonClient;
     }
@@ -446,3 +482,4 @@ public class CloudFormation {
         return map;
     }
 }
+
