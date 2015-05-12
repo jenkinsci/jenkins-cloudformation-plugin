@@ -254,6 +254,8 @@ public class CloudFormation {
                   return false;
               }
 
+              logger.println("Stack status " + stackStatus + ".");
+              
             } catch (AmazonServiceException ase) {
                 if (!RetryUtils.isThrottlingException(ase)) {
                     throw ase;
@@ -290,13 +292,17 @@ public class CloudFormation {
         Stack stack = null;
         long startTime = System.currentTimeMillis();
         int retries = 1;
+        long subTime = startTime;
         while (isStackCreationInProgress(status)) {
+            logger.println("Time since last check: " + (System.currentTimeMillis() - subTime));
+            subTime = System.currentTimeMillis();
             if (isTimeout(startTime)) {
                 throw new TimeoutException("Timed out waiting for stack to be created. (timeout=" + timeout + ")");
             }
             try {
                 stack = getStack(amazonClient.describeStacks(describeStacksRequest));
                 status = getStackStatus(stack.getStackStatus());
+                logger.println("Stack status " + status + ".");
                 if (isStackCreationInProgress(status)) {
                     sleep(retries);
                 }
@@ -304,6 +310,7 @@ public class CloudFormation {
                 if (!RetryUtils.isThrottlingException(ase)) {
                     throw ase;
                 }
+                logger.println("Stack status request throttled; retrying.");
                 sleep(retries);
             }
             retries++;
