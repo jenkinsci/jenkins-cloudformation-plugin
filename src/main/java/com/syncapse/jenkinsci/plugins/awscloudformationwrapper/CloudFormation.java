@@ -292,14 +292,14 @@ public class CloudFormation {
         Stack stack = null;
         long startTime = System.currentTimeMillis();
         int retries = 1;
-        long subTime = startTime;
+        long subTime = startTime, lastTime;
         while (isStackCreationInProgress(status)) {
-            logger.println("Time since last check: " + (System.currentTimeMillis() - subTime));
+            lastTime = subTime;
             subTime = System.currentTimeMillis();
             try {
                 stack = getStack(amazonClient.describeStacks(describeStacksRequest));
                 status = getStackStatus(stack.getStackStatus());
-                logger.println("Stack status " + status + ".");
+                logger.println("Stack status " + status + ". ( " + (subTime - lastTime) + "ms since previous check)");
                 if (isStackCreationInProgress(status)) {
                     if (isTimeout(startTime)) {
                         throw new TimeoutException("Timed out waiting for stack to be created. (timeout=" + timeout + ")");
