@@ -30,6 +30,7 @@ import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackEvent;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.cloudformation.model.StackSummary;
+import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.google.common.collect.Lists;
 import hudson.EnvVars;
 import java.util.ArrayList;
@@ -340,7 +341,7 @@ public class CloudFormation {
     }
 
     private boolean isStackCreationSuccessful(StackStatus status) {
-        return status == StackStatus.CREATE_COMPLETE;
+        return status == StackStatus.CREATE_COMPLETE || status == StackStatus.UPDATE_COMPLETE;
     }
 
     private void sleep() {
@@ -355,7 +356,7 @@ public class CloudFormation {
     }
 
     private boolean isStackCreationInProgress(StackStatus status) {
-        return status == StackStatus.CREATE_IN_PROGRESS;
+        return status == StackStatus.CREATE_IN_PROGRESS || status == StackStatus.UPDATE_IN_PROGRESS;
     }
 
     private StackStatus getStackStatus(String status) {
