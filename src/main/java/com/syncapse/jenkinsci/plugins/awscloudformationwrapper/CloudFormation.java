@@ -186,10 +186,17 @@ public class CloudFormation {
 
         logger.println("Creating Cloud Formation stack: " + getExpandedStackName());
 
-        CreateStackRequest request = createStackRequest();
-
         try {
-            amazonClient.createStack(request);
+            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(getExpandedStackName());
+			Stack stack = getStack(amazonClient.describeStacks(describeStacksRequest));
+			if(stack == null) {
+			    CreateStackRequest request = createStackRequest();
+			    amazonClient.createStack(request);
+			}
+			else {
+			    UpdateStackRequest updateRequest = updateStackRequest();
+				amazonClient.updateStack(updateRequest);
+			}
 
             stack = waitForStackToBeCreated();
 
@@ -404,6 +411,16 @@ public class CloudFormation {
         return r;
     }
 
+    private UpdateStackRequest updateStackRequest() {
+		UpdateStackRequest r = new UpdateStackRequest();
+        r.withStackName(getExpandedStackName());
+        r.withParameters(parameters);
+        r.withTemplateBody(recipe);
+        r.withCapabilities("CAPABILITY_IAM");
+
+        return r;
+	}
+	
     public Map<String, String> getOutputs() {
         // Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
         HashMap<String, String> map = new HashMap<String, String>();
