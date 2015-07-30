@@ -121,9 +121,20 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 			AbstractBuild<?, ?> build, EnvVars env, PrintStream logger)
 			throws IOException {
 
-		return new CloudFormation(logger, stackBean.getStackName(), build
-				.getWorkspace().child(stackBean.getCloudFormationRecipe())
-				.readToString(), stackBean.getParsedParameters(env),
+		Boolean isURL = false;
+		String recipe = null;
+        // if the recipe name begins with http:// or https:// then treat as a URL
+        // ...didn't want to catch files that start with http
+		if(stackBean.getCloudFormationRecipe().regionMatches(true, 0, "http://", 0, 7)
+			|| stackBean.getCloudFormationRecipe().regionMatches(true, 0, "https://", 0, 8)) {
+			isURL = true;
+			recipe = stackBean.getCloudFormationRecipe();
+		} else {
+			recipe = build.getWorkspace().child(stackBean.getCloudFormationRecipe()).readToString();
+		}
+
+		return new CloudFormation(logger, stackBean.getStackName(), isURL,
+				recipe, stackBean.getParsedParameters(env),
 				stackBean.getTimeout(), stackBean.getParsedAwsAccessKey(env),
 				stackBean.getParsedAwsSecretKey(env),
 				stackBean.getAwsRegion(), stackBean.getAutoDeleteStack(), env,false);

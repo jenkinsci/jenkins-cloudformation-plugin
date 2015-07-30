@@ -99,9 +99,20 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 			AbstractBuild<?, ?> build, EnvVars env, PrintStream logger)
 			throws IOException {
 
-		return new CloudFormation(logger, postBuildStackBean.getStackName(), build
-				.getWorkspace().child(postBuildStackBean.getCloudFormationRecipe())
-				.readToString(), postBuildStackBean.getParsedParameters(env),
+		Boolean isURL = false;
+		String recipe = null;
+        // if the recipe name begins with http:// or https:// then treat as a URL
+        // ...didn't want to catch files that start with http
+		if(postBuildStackBean.getCloudFormationRecipe().regionMatches(true, 0, "http://", 0, 7)
+			|| postBuildStackBean.getCloudFormationRecipe().regionMatches(true, 0, "https://", 0, 8)) {
+			isURL = true;
+			recipe = postBuildStackBean.getCloudFormationRecipe();
+		} else {
+			recipe = build.getWorkspace().child(postBuildStackBean.getCloudFormationRecipe()).readToString();
+		}
+
+		return new CloudFormation(logger, postBuildStackBean.getStackName(), isURL,
+				recipe, postBuildStackBean.getParsedParameters(env),
 				postBuildStackBean.getTimeout(), postBuildStackBean.getParsedAwsAccessKey(env),
 				postBuildStackBean.getParsedAwsSecretKey(env),
 				postBuildStackBean.getAwsRegion(), env,false,postBuildStackBean.getSleep());
