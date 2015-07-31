@@ -31,6 +31,7 @@ import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackEvent;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.cloudformation.model.StackSummary;
+import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.google.common.collect.Lists;
 import hudson.EnvVars;
 import java.util.ArrayList;
@@ -182,10 +183,17 @@ public class CloudFormation {
 
         logger.println("Creating Cloud Formation stack: " + getExpandedStackName());
 
-        CreateStackRequest request = createStackRequest();
-
         try {
-            amazonClient.createStack(request);
+            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(getExpandedStackName());
+			Stack stack = getStack(amazonClient.describeStacks(describeStacksRequest));
+			if(stack == null) {
+			    CreateStackRequest request = createStackRequest();
+			    amazonClient.createStack(request);
+			}
+			else {
+			    UpdateStackRequest updateRequest = updateStackRequest();
+				amazonClient.updateStack(updateRequest);
+			}
 
             stack = waitForStackToBeCreated();
 
@@ -354,7 +362,7 @@ public class CloudFormation {
     }
 
     private boolean isStackCreationSuccessful(StackStatus status) {
-        return status == StackStatus.CREATE_COMPLETE;
+        return status == StackStatus.CREATE_COMPLETE || status == StackStatus.UPDATE_COMPLETE;
     }
 
     private long getWaitBetweenAttempts (int retries) {
@@ -377,7 +385,7 @@ public class CloudFormation {
     }
 
     private boolean isStackCreationInProgress(StackStatus status) {
-        return status == StackStatus.CREATE_IN_PROGRESS;
+        return status == StackStatus.CREATE_IN_PROGRESS || status == StackStatus.UPDATE_IN_PROGRESS;
     }
 
     private StackStatus getStackStatus(String status) {
@@ -396,6 +404,16 @@ public class CloudFormation {
         return r;
     }
 
+    private UpdateStackRequest updateStackRequest() {
+		UpdateStackRequest r = new UpdateStackRequest();
+        r.withStackName(getExpandedStackName());
+        r.withParameters(parameters);
+        r.withTemplateBody(recipe);
+        r.withCapabilities("CAPABILITY_IAM");
+
+        return r;
+	}
+	
     public Map<String, String> getOutputs() {
         // Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
         HashMap<String, String> map = new HashMap<String, String>();
