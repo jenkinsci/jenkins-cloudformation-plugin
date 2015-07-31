@@ -101,10 +101,7 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 
 		Boolean isURL = false;
 		String recipe = null;
-        // if the recipe name begins with http:// or https:// then treat as a URL
-        // ...didn't want to catch files that start with http
-		if(postBuildStackBean.getCloudFormationRecipe().regionMatches(true, 0, "http://", 0, 7)
-			|| postBuildStackBean.getCloudFormationRecipe().regionMatches(true, 0, "https://", 0, 8)) {
+		if(CloudFormation.isRecipeURL(postBuildStackBean.getCloudFormationRecipe())) {
 			isURL = true;
 			recipe = postBuildStackBean.getCloudFormationRecipe();
 		} else {

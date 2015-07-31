@@ -453,4 +453,14 @@ public class CloudFormation {
         }
         return map;
     }
+
+    public static boolean isRecipeURL(String recipe) {
+        // if the recipe name begins with http:// or https:// then treat as a URL
+        // ...didn't want to catch files that start with http
+        if(recipe.regionMatches(true, 0, "http://", 0, 7)
+            || recipe.regionMatches(true, 0, "https://", 0, 8)) {
+            return true;
+        }
+        return false;
+    }
 }

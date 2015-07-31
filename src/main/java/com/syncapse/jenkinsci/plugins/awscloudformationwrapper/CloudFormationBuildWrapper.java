@@ -123,10 +123,8 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
 		Boolean isURL = false;
 		String recipe = null;
-        // if the recipe name begins with http:// or https:// then treat as a URL
-        // ...didn't want to catch files that start with http
-		if(stackBean.getCloudFormationRecipe().regionMatches(true, 0, "http://", 0, 7)
-			|| stackBean.getCloudFormationRecipe().regionMatches(true, 0, "https://", 0, 8)) {
+		
+		if(CloudFormation.isRecipeURL(stackBean.getCloudFormationRecipe())) {
 			isURL = true;
 			recipe = stackBean.getCloudFormationRecipe();
 		} else {
