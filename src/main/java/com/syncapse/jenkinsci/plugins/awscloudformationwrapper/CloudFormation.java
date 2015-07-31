@@ -56,6 +56,7 @@ public class CloudFormation {
      */
     public static final long MIN_TIMEOUT = 300;
     private String stackName;
+    private Boolean isRecipeURL;
     private String recipe;
     private List<Parameter> parameters;
     private long timeout;
@@ -76,6 +77,7 @@ public class CloudFormation {
      * @param logger a logger to write progress information.
      * @param stackName the name of the stack as defined in the AWS
      * CloudFormation API.
+     * @param isRecipeURL true to treat the recipeBody as a URL
      * @param recipeBody the body of the json document describing the stack.
      * @param parameters a Map of where the keys are the param name and the
      * value the param value.
@@ -85,13 +87,14 @@ public class CloudFormation {
      * @param awsAccessKey the AWS API Access Key.
      * @param awsSecretKey the AWS API Secret Key.
      */
-    public CloudFormation(PrintStream logger, String stackName,
+    public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
             boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected) {
 
         this.logger = logger;
         this.stackName = stackName;
+        this.isRecipeURL = isRecipeURL;
         this.recipe = recipeBody;
         this.parameters = parameters(parameters);
         this.awsAccessKey = awsAccessKey;
@@ -109,13 +112,14 @@ public class CloudFormation {
         this.envVars = envVars;
     
     }
-    public CloudFormation(PrintStream logger, String stackName,
+    public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
             EnvVars envVars, Boolean isPrefixSelected,long sleep) {
 
         this.logger = logger;
         this.stackName = stackName;
+        this.isRecipeURL = isRecipeURL;
         this.recipe = recipeBody;
         this.parameters = parameters(parameters);
         this.awsAccessKey = awsAccessKey;
@@ -133,11 +137,11 @@ public class CloudFormation {
         this.sleep=sleep;
     
     }
-    public CloudFormation(PrintStream logger, String stackName,
+    public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters, long timeout,
             String awsAccessKey, String awsSecretKey, boolean autoDeleteStack,
             EnvVars envVars, Boolean isPrefixSelected) {
-        this(logger, stackName, recipeBody, parameters, timeout, awsAccessKey,
+        this(logger, stackName, isRecipeURL, recipeBody, parameters, timeout, awsAccessKey,
                 awsSecretKey, null, autoDeleteStack, envVars, isPrefixSelected);
     }
 
@@ -398,7 +402,11 @@ public class CloudFormation {
         CreateStackRequest r = new CreateStackRequest();
         r.withStackName(getExpandedStackName());
         r.withParameters(parameters);
-        r.withTemplateBody(recipe);
+        if (isRecipeURL) {
+            r.withTemplateURL(recipe);
+        } else {
+            r.withTemplateBody(recipe);
+        }
         r.withCapabilities("CAPABILITY_IAM");
 
         return r;
@@ -491,5 +499,15 @@ public class CloudFormation {
             map.put(parameter.getParameterKey(), parameter.getParameterValue());
         }
         return map;
+    }
+
+    public static boolean isRecipeURL(String recipe) {
+        // if the recipe name begins with http:// or https:// then treat as a URL
+        // ...didn't want to catch files that start with http
+        if(recipe.regionMatches(true, 0, "http://", 0, 7)
+            || recipe.regionMatches(true, 0, "https://", 0, 8)) {
+            return true;
+        }
+        return false;
     }
 }
