@@ -185,19 +185,29 @@ public class CloudFormation {
      */
     public boolean create() throws TimeoutException, InterruptedException {
 
-        logger.println("Creating Cloud Formation stack: " + getExpandedStackName());
+        logger.println("Determining to create or update Cloud Formation stack: " + getExpandedStackName());
 
         try {
-            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(getExpandedStackName());
-			Stack stack = getStack(amazonClient.describeStacks(describeStacksRequest));
-			if(stack == null) {
-			    CreateStackRequest request = createStackRequest();
-			    amazonClient.createStack(request);
-			}
-			else {
-			    UpdateStackRequest updateRequest = updateStackRequest();
-				amazonClient.updateStack(updateRequest);
-			}
+            try {
+                DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(getExpandedStackName());
+                Stack stack = getStack(amazonClient.describeStacks(describeStacksRequest));
+            } catch (AmazonServiceException e) {
+                logger.println("Stack not found: " + getExpandedStackName() + ". Reason: " + detailedError(e));
+            } catch (AmazonClientException e) {
+                logger.println("Stack not found: " + getExpandedStackName() + ". Error was: " + e.getCause());
+            }
+
+            if(stack == null) {
+                logger.println("Creating Cloud Formation stack: " + getExpandedStackName());
+                CreateStackRequest request = createStackRequest();
+                amazonClient.createStack(request);
+            }
+            else {
+                logger.println("Updating Cloud Formation stack: " + getExpandedStackName());
+                UpdateStackRequest updateRequest = updateStackRequest();
+                amazonClient.updateStack(updateRequest);
+            }
+
 
             stack = waitForStackToBeCreated();
 
