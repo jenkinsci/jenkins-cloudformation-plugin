@@ -124,11 +124,11 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 		Boolean isURL = false;
 		String recipe = null;
 		
-		if(CloudFormation.isRecipeURL(stackBean.getCloudFormationRecipe())) {
+		if(CloudFormation.isRecipeURL(stackBean.getParsedCloudFormationRecipe(env))) {
 			isURL = true;
-			recipe = stackBean.getCloudFormationRecipe();
+			recipe = stackBean.getParsedCloudFormationRecipe(env);
 		} else {
-			recipe = build.getWorkspace().child(stackBean.getCloudFormationRecipe()).readToString();
+			recipe = build.getWorkspace().child(stackBean.getParsedCloudFormationRecipe(env)).readToString();
 		}
 
 		return new CloudFormation(logger, stackBean.getStackName(), isURL,
