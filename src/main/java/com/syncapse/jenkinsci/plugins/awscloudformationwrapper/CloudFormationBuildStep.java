@@ -102,11 +102,11 @@ public class CloudFormationBuildStep extends Builder{
 
 		Boolean isURL = false;
 		String recipe = null;
-		if(CloudFormation.isRecipeURL(postBuildStackBean.getCloudFormationRecipe())) {
+		if(CloudFormation.isRecipeURL(postBuildStackBean.getParsedCloudFormationRecipe(env))) {
 			isURL = true;
-			recipe = postBuildStackBean.getCloudFormationRecipe();
+			recipe = postBuildStackBean.getParsedCloudFormationRecipe(env);
 		} else {
-			recipe = build.getWorkspace().child(postBuildStackBean.getCloudFormationRecipe()).readToString();
+			recipe = build.getWorkspace().child(postBuildStackBean.getParsedCloudFormationRecipe(env)).readToString();
 		}
 
 		return new CloudFormation(logger, postBuildStackBean.getStackName(), isURL,
