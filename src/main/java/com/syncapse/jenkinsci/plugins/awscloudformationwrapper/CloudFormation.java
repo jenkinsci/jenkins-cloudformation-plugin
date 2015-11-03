@@ -186,11 +186,12 @@ public class CloudFormation {
     public boolean create() throws TimeoutException, InterruptedException {
 
         logger.println("Determining to create or update Cloud Formation stack: " + getExpandedStackName());
+        Stack stack = null;
 
         try {
             try {
                 DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(getExpandedStackName());
-                Stack stack = getStack(amazonClient.describeStacks(describeStacksRequest));
+                stack = getStack(amazonClient.describeStacks(describeStacksRequest));
             } catch (AmazonServiceException e) {
                 logger.println("Stack not found: " + getExpandedStackName() + ". Reason: " + detailedError(e));
             } catch (AmazonClientException e) {
