@@ -11,7 +11,9 @@ import java.util.Map;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.retry.RetryUtils;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
@@ -34,6 +36,8 @@ import com.amazonaws.services.cloudformation.model.StackSummary;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.google.common.collect.Lists;
 import hudson.EnvVars;
+import hudson.ProxyConfiguration;
+import hudson.model.Hudson;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -249,10 +253,27 @@ public class CloudFormation {
     protected AmazonCloudFormation getAWSClient() {
         AWSCredentials credentials = new BasicAWSCredentials(this.awsAccessKey,
                 this.awsSecretKey);
-        AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
-                credentials);
-        amazonClient.setEndpoint(awsRegion.endPoint);
-        return amazonClient;
+        Hudson hudson = Hudson.getInstance(); 
+        ProxyConfiguration proxyConfig = hudson != null ? hudson.proxy : null;
+        if (proxyConfig != null && proxyConfig.name != null) {
+           ClientConfiguration config = new ClientConfiguration();
+           config.setProxyHost(proxyConfig.name);
+           config.setProxyPort(proxyConfig.port);
+           config.setProxyUsername(proxyConfig.getUserName());
+           config.setProxyPassword(proxyConfig.getPassword());
+           config.setPreemptiveBasicProxyAuth(true);
+           AWSCredentialsProvider provider = new BasicAWSCredentialsProvider(credentials);
+           AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
+                   provider, config);
+   
+           amazonClient.setEndpoint(awsRegion.endPoint);
+           return amazonClient;
+        } else {
+          AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
+                  credentials);
+          amazonClient.setEndpoint(awsRegion.endPoint);
+          return amazonClient;
+        }
     }
 
     private boolean waitForStackToBeDeleted() {
@@ -520,4 +541,22 @@ public class CloudFormation {
         }
         return false;
     }
+}
+
+class BasicAWSCredentialsProvider implements AWSCredentialsProvider {
+   
+   AWSCredentials awsCredentials;
+   
+   public BasicAWSCredentialsProvider(AWSCredentials awsCredentials) {
+       this.awsCredentials = awsCredentials;
+   }
+   
+   public AWSCredentials getCredentials() {
+       return awsCredentials;
+   }
+   
+   public void refresh() {
+       
+   }
+   
 }
