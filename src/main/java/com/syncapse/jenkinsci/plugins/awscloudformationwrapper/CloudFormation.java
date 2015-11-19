@@ -186,7 +186,6 @@ public class CloudFormation {
     public boolean create() throws TimeoutException, InterruptedException {
 
         logger.println("Determining to create or update Cloud Formation stack: " + getExpandedStackName());
-        Stack stack = null;
 
         try {
             try {
