@@ -376,7 +376,7 @@ public class CloudFormation {
     }
 
     private boolean isStackCreationSuccessful(StackStatus status) {
-        return status == StackStatus.CREATE_COMPLETE || status == StackStatus.UPDATE_COMPLETE;
+        return status == StackStatus.CREATE_COMPLETE || status == StackStatus.UPDATE_COMPLETE || status == StackStatus.UPDATE_COMPLETE_CLEANUP_IN_PROGRESS;
     }
 
     private long getWaitBetweenAttempts (int retries) {
