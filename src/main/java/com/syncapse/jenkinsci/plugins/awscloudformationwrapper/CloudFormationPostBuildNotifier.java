@@ -52,7 +52,7 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 		return super.prebuild(build, listener);
 	}
 
-       
+
 	@Override
 	public Action getProjectAction(AbstractProject<?, ?> project) {
 		LOGGER.info("getProjectAction");
@@ -64,28 +64,16 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 		LOGGER.info("getProjectActions");
 		return super.getProjectActions(project);
 	}
-  
+
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-		EnvVars envVars = build.getEnvironment(listener);
-                envVars.overrideAll(build.getBuildVariables());
+		EnvVars env = build.getEnvironment(listener);
+    env.overrideAll(build.getBuildVariables());
 		boolean result = true;
-                  
-                 
+		PrintStream logger = listener.getLogger();
+
 		for (PostBuildStackBean stack : stacks) {
-		final CloudFormation cloudFormation = newCloudFormation(stack,build, envVars, listener.getLogger());	
-                    /*CloudFormation cloudFormation = new CloudFormation(
-					listener.getLogger(),
-					stack.getStackName(),
-					"",
-					new HashMap<String, String>(),
-					0,
-					stack.getParsedAwsAccessKey(envVars),
-					stack.getParsedAwsSecretKey(envVars),
-					stack.getAwsRegion(),
-					false,
-					envVars
-			);*/
+		final CloudFormation cloudFormation = newCloudFormation(stack, build, env, listener.getLogger());
 			if(cloudFormation.create()) {
 				LOGGER.info("Success");
 			} else {
@@ -109,10 +97,10 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 		}
 
 		return new CloudFormation(logger, postBuildStackBean.getStackName(), isURL,
-				recipe, postBuildStackBean.getParsedParameters(env),
-				postBuildStackBean.getTimeout(), postBuildStackBean.getParsedAwsAccessKey(env),
-				postBuildStackBean.getParsedAwsSecretKey(env),
-				postBuildStackBean.getAwsRegion(), env,false,postBuildStackBean.getSleep());
+        recipe, postBuildStackBean.getParsedParameters(env),
+        postBuildStackBean.getTimeout(), postBuildStackBean.getParsedAwsAccessKey(env),
+        postBuildStackBean.getParsedAwsSecretKey(env),
+        postBuildStackBean.getAwsRegion(), false, env, false, postBuildStackBean.getSleep());
 
 	}
 	@Override
@@ -127,7 +115,7 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 
 		@Override
 		public String getDisplayName() {
-                    
+
 			return "AWS Cloud Formation";
 		}
 
@@ -135,6 +123,6 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
 			return true;
 		}
-                
+
 	}
 }
