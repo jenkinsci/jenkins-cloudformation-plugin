@@ -58,26 +58,17 @@ public class CloudFormationNotifier extends Notifier {
 		LOGGER.info("getProjectActions");
 		return super.getProjectActions(project);
 	}
-  
+
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		EnvVars envVars = build.getEnvironment(listener);
 		boolean result = true;
 		for (SimpleStackBean stack : stacks) {
-			CloudFormation cloudFormation = new CloudFormation(
-					listener.getLogger(),
-					stack.getStackName(),
-					false,
-					"",
-					new HashMap<String, String>(),
-					0,
-					stack.getParsedAwsAccessKey(envVars),
-					stack.getParsedAwsSecretKey(envVars),
-					stack.getAwsRegion(),
-					false,
-					envVars,
-                                stack.getIsPrefixSelected()
-			);
+			CloudFormation cloudFormation = new CloudFormation(listener.getLogger(),
+					stack.getStackName(), false, "", new HashMap<String, String>(), 0,
+					stack.getParsedAwsAccessKey(envVars), stack.getParsedAwsSecretKey(envVars),
+					stack.getAwsRegion(), false, envVars, stack.getIsPrefixSelected());
+
 			if(cloudFormation.delete()) {
 				LOGGER.info("Success");
 			} else {
