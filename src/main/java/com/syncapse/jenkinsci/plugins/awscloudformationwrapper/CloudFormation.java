@@ -68,7 +68,6 @@ public class CloudFormation {
     private String awsSecretKey;
     private PrintStream logger;
     private AmazonCloudFormation amazonClient;
-    private Stack stack;
     private boolean autoDeleteStack;
     private EnvVars envVars;
     private Region awsRegion;
@@ -191,10 +190,12 @@ public class CloudFormation {
 
         logger.println("Determining to create or update Cloud Formation stack: " + getExpandedStackName());
 
+        Stack stack = null;
+
         try {
             try {
                 DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(getExpandedStackName());
-                Stack stack = getStack(amazonClient.describeStacks(describeStacksRequest));
+                stack = getStack(amazonClient.describeStacks(describeStacksRequest));
             } catch (AmazonServiceException e) {
                 logger.println("Stack not found: " + getExpandedStackName() + ". Reason: " + detailedError(e));
             } catch (AmazonClientException e) {
@@ -278,6 +279,7 @@ public class CloudFormation {
 
     private boolean waitForStackToBeDeleted() {
         int retries = 1;
+        Stack stack = null;
         while (true) {
             try {
 
@@ -304,7 +306,7 @@ public class CloudFormation {
                     throw ase;
                 }
             }
-            sleep(retries);
+            sleep(stack, retries);
             retries++;
         }
 
@@ -347,7 +349,7 @@ public class CloudFormation {
                     if (isTimeout(startTime)) {
                         throw new TimeoutException("Timed out waiting for stack to be created. (timeout=" + timeout + ")");
                     }
-                    sleep(retries);
+                    sleep(stack, retries);
                 }
             } catch (AmazonServiceException ase) {
                 if (!RetryUtils.isThrottlingException(ase)) {
@@ -357,7 +359,7 @@ public class CloudFormation {
                     throw new TimeoutException("Timed out waiting for stack to be created. (timeout=" + timeout + ")");
                 }
                 logger.println("Stack status request throttled; retrying.");
-                sleep(retries);
+                sleep(stack, retries);
             }
             retries++;
         }
@@ -397,7 +399,7 @@ public class CloudFormation {
     }
 
     private boolean isStackCreationSuccessful(StackStatus status) {
-        return status == StackStatus.CREATE_COMPLETE || status == StackStatus.UPDATE_COMPLETE;
+        return status == StackStatus.CREATE_COMPLETE || status == StackStatus.UPDATE_COMPLETE || status == StackStatus.UPDATE_COMPLETE_CLEANUP_IN_PROGRESS;
     }
 
     private long getWaitBetweenAttempts (int retries) {
@@ -408,7 +410,7 @@ public class CloudFormation {
         }
     }
 
-    private void sleep(int retries) {
+    private void sleep(Stack stack, int retries) {
         try {
             Thread.sleep(getWaitBetweenAttempts(retries));
         } catch (InterruptedException e) {
