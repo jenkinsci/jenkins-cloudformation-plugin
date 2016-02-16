@@ -1,6 +1,18 @@
+# Java compiled output
+*.war
+*.jar
+*.class
+
+# Maven files
 target
+
+work
+
+# IDEA IntelliJ files and folders
+*.iml
+.idea/
+
+# Eclipse files and folders
 .classpath
 .project
-work
 .settings
-.idea/
