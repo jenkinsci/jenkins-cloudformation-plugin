@@ -105,12 +105,7 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 			isURL = true;
 			recipe = postBuildStackBean.getCloudFormationRecipe();
 		} else {
-			try {
-				recipe = build.getWorkspace().child(postBuildStackBean.getCloudFormationRecipe()).readToString();
-			} catch (InterruptedException ie) {
-				LOGGER.severe("Interrupted exception occurred: " + ie.getStackTrace());
-				return null;
-			}
+			recipe = build.getWorkspace().child(postBuildStackBean.getCloudFormationRecipe()).readToString();
 		}
 
 		return new CloudFormation(logger, postBuildStackBean.getStackName(), isURL,
