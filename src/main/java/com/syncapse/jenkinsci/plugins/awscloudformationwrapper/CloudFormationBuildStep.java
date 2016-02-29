@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.logging.Logger;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -29,8 +30,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
  *
  * @author amit.gilad
  */
-public class CloudFormationBuildStep extends Builder{
-    	private static final Logger LOGGER = Logger.getLogger(CloudFormationBuildStep.class.getName());
+public class CloudFormationBuildStep extends Builder {
+  private static final Logger LOGGER = Logger.getLogger(CloudFormationBuildStep.class.getName());
 	private final List<PostBuildStackBean> stacks;
 
 	@DataBoundConstructor
@@ -53,7 +54,7 @@ public class CloudFormationBuildStep extends Builder{
 		return super.prebuild(build, listener);
 	}
 
-       
+
 	@Override
 	public Action getProjectAction(AbstractProject<?, ?> project) {
 		LOGGER.info("getProjectAction");
@@ -65,29 +66,29 @@ public class CloudFormationBuildStep extends Builder{
 		LOGGER.info("getProjectActions");
 		return super.getProjectActions(project);
 	}
-  
+
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-		EnvVars envVars = build.getEnvironment(listener);
-                envVars.overrideAll(build.getBuildVariables());
+		EnvVars env = build.getEnvironment(listener);
+    env.overrideAll(build.getBuildVariables());
 		boolean result = true;
-                  
-                 
+		PrintStream logger = listener.getLogger();
+
 		for (PostBuildStackBean stack : stacks) {
-		final CloudFormation cloudFormation = newCloudFormation(stack,build, envVars, listener.getLogger());	
-                    /*CloudFormation cloudFormation = new CloudFormation(
-					listener.getLogger(),
-					stack.getStackName(),
-					"",
-					new HashMap<String, String>(),
-					0,
-					stack.getParsedAwsAccessKey(envVars),
-					stack.getParsedAwsSecretKey(envVars),
-					stack.getAwsRegion(),
-					false,
-					envVars
-			);*/
+		final CloudFormation cloudFormation = newCloudFormation(stack, build, env, listener.getLogger());
+
 			if(cloudFormation.create()) {
+				// Adding outputs to our injection action
+				Map<String,String> outputs = cloudFormation.getOutputs();
+				for (Map.Entry<String,String> output : outputs.entrySet()) {
+        	logger.println("New Environment Variable: " + output.getKey() + "=" + output.getValue());
+	        VariableInjectionAction action = new VariableInjectionAction(output.getKey(), output.getValue());
+	        build.addAction(action);
+    		}
+
+    		// Rebuild environment
+        build.getEnvironment();
+
 				LOGGER.info("Success");
 			} else {
 				LOGGER.warning("Failed");
@@ -96,24 +97,26 @@ public class CloudFormationBuildStep extends Builder{
 		}
 		return result;
 	}
+
 	protected CloudFormation newCloudFormation(PostBuildStackBean postBuildStackBean,
 			AbstractBuild<?, ?> build, EnvVars env, PrintStream logger)
 			throws IOException {
 
 		Boolean isURL = false;
 		String recipe = null;
-		if(CloudFormation.isRecipeURL(postBuildStackBean.getCloudFormationRecipe())) {
+
+		if(CloudFormation.isRecipeURL(postBuildStackBean.getParsedCloudFormationRecipe(env))) {
 			isURL = true;
-			recipe = postBuildStackBean.getCloudFormationRecipe();
+			recipe = postBuildStackBean.getParsedCloudFormationRecipe(env);
 		} else {
-			recipe = build.getWorkspace().child(postBuildStackBean.getCloudFormationRecipe()).readToString();
+			recipe = build.getWorkspace().child(postBuildStackBean.getParsedCloudFormationRecipe(env)).readToString();
 		}
 
 		return new CloudFormation(logger, postBuildStackBean.getStackName(), isURL,
 				recipe, postBuildStackBean.getParsedParameters(env),
 				postBuildStackBean.getTimeout(), postBuildStackBean.getParsedAwsAccessKey(env),
 				postBuildStackBean.getParsedAwsSecretKey(env),
-				postBuildStackBean.getAwsRegion(), env,false,postBuildStackBean.getSleep());
+				postBuildStackBean.getAwsRegion(), false, env, false, postBuildStackBean.getSleep());
 
 	}
 	@Override
@@ -128,7 +131,7 @@ public class CloudFormationBuildStep extends Builder{
 
 		@Override
 		public String getDisplayName() {
-                    
+
 			return "AWS Cloud Formation";
 		}
 
@@ -136,6 +139,6 @@ public class CloudFormationBuildStep extends Builder{
 		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
 			return true;
 		}
-                
+
 	}
 }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
@@ -24,7 +24,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * @author erickdovale
- * 
+ *
  */
 public class CloudFormationBuildWrapper extends BuildWrapper {
 
@@ -51,11 +51,12 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	public Environment setUp(AbstractBuild build, Launcher launcher,
 			BuildListener listener) throws IOException, InterruptedException {
 
-        EnvVars env = build.getEnvironment(listener);
-        env.overrideAll(build.getBuildVariables());
-        
-        boolean success = true;
-        
+    EnvVars env = build.getEnvironment(listener);
+    env.overrideAll(build.getBuildVariables());
+
+    boolean success = true;
+    PrintStream logger = listener.getLogger();
+
 		for (StackBean stackBean : stacks) {
 
 			final CloudFormation cloudFormation = newCloudFormation(stackBean,
@@ -64,6 +65,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 			try {
 				if (cloudFormation.create()) {
 					cloudFormations.add(cloudFormation);
+					logger.println("Adding environment variables to Jenkins in BuildWrapper.");
 					env.putAll(cloudFormation.getOutputs());
 				} else {
 					build.setResult(Result.FAILURE);
@@ -81,7 +83,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 			}
 
 		}
-		
+
 		// If any stack fails to create then destroy them all
 		if (!success) {
 			doTearDown();
@@ -94,12 +96,12 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 					throws IOException, InterruptedException {
 
 				return doTearDown();
-				
+
 			}
 
 		};
 	}
-	
+
 	protected boolean doTearDown() throws IOException, InterruptedException{
 		boolean result = true;
 
@@ -123,20 +125,19 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
 		Boolean isURL = false;
 		String recipe = null;
-		
-		if(CloudFormation.isRecipeURL(stackBean.getCloudFormationRecipe())) {
+
+		if(CloudFormation.isRecipeURL(stackBean.getParsedCloudFormationRecipe(env))) {
 			isURL = true;
-			recipe = stackBean.getCloudFormationRecipe();
+			recipe = stackBean.getParsedCloudFormationRecipe(env);
 		} else {
-			recipe = build.getWorkspace().child(stackBean.getCloudFormationRecipe()).readToString();
+			recipe = build.getWorkspace().child(stackBean.getParsedCloudFormationRecipe(env)).readToString();
 		}
 
 		return new CloudFormation(logger, stackBean.getStackName(), isURL,
 				recipe, stackBean.getParsedParameters(env),
 				stackBean.getTimeout(), stackBean.getParsedAwsAccessKey(env),
 				stackBean.getParsedAwsSecretKey(env),
-				stackBean.getAwsRegion(), stackBean.getAutoDeleteStack(), env,false);
-
+				stackBean.getAwsRegion(), stackBean.getAutoDeleteStack(), env, false);
 	}
 
 	@Extension
@@ -151,7 +152,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 		public boolean isApplicable(AbstractProject<?, ?> item) {
 			return true;
 		}
-		
+
 	}
 
 	public List<StackBean> getStacks() {
@@ -162,9 +163,9 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	 * @return
 	 */
 	private Object readResolve() {
-		// Initialize the cloud formation collection during deserialization to avoid NPEs. 
+		// Initialize the cloud formation collection during deserialization to avoid NPEs.
 		cloudFormations = new ArrayList<CloudFormation>();
 		return this;
 	}
-	
+
 }

@@ -104,7 +104,7 @@ public class CloudFormation {
         this.awsSecretKey = awsSecretKey;
         this.awsRegion = region != null ? region : Region.getDefault();
         this.isPrefixSelected = isPrefixSelected;
-        
+
         if (timeout == -12345) {
             this.timeout = 0; // Faster testing.
         } else {
@@ -113,12 +113,12 @@ public class CloudFormation {
         this.amazonClient = getAWSClient();
         this.autoDeleteStack = autoDeleteStack;
         this.envVars = envVars;
-    
     }
+
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
-            EnvVars envVars, Boolean isPrefixSelected,long sleep) {
+            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected, long sleep) {
 
         this.logger = logger;
         this.stackName = stackName;
@@ -135,11 +135,11 @@ public class CloudFormation {
             this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
         }
         this.amazonClient = getAWSClient();
-        this.autoDeleteStack = false;
+        this.autoDeleteStack = autoDeleteStack;
         this.envVars = envVars;
         this.sleep=sleep;
-    
     }
+
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters, long timeout,
             String awsAccessKey, String awsSecretKey, boolean autoDeleteStack,
@@ -227,6 +227,7 @@ public class CloudFormation {
 
                 logger.println("Successfully created stack: " + getExpandedStackName());
                 this.outputs = stackOutput;
+
                 Thread.sleep(TimeUnit.SECONDS.toMillis(sleep));
                 return true;
             } else {
@@ -300,7 +301,7 @@ public class CloudFormation {
               }
 
               logger.println("Stack status " + stackStatus + ".");
-              
+
             } catch (AmazonServiceException ase) {
                 if (!RetryUtils.isThrottlingException(ase)) {
                     throw ase;
@@ -454,12 +455,21 @@ public class CloudFormation {
 
         return r;
 	}
-	
+
     public Map<String, String> getOutputs() {
-        // Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
+        // Prefix outputs with stack name to prevent
+        // collisions with other stacks created in the same build.
+        // We also define the outputs without stack prefix so
+        // that we can easily have dynamic stack names.
         HashMap<String, String> map = new HashMap<String, String>();
         for (String key : outputs.keySet()) {
-            map.put(getExpandedStackName() + "_" + key, outputs.get(key));
+            // Make our output environment friendly
+            // Replace - with _ and set all to uppercase.
+            String envFriendlyKey = key.replaceAll("-", "_").toUpperCase();
+            String envFriendlyStackName = getExpandedStackName().replaceAll("-", "_").toUpperCase();
+            // Add them to our map
+            map.put(envFriendlyStackName + "_" + envFriendlyKey, outputs.get(key));
+            map.put(envFriendlyKey, outputs.get(key));
         }
         return map;
     }
@@ -494,7 +504,7 @@ public class CloudFormation {
                 stackToDelete = summary.getStackName();
             }
         }
-        
+
         return stackToDelete;
     }
 
