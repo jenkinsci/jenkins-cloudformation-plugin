@@ -12,7 +12,7 @@
 	<packaging>hpi</packaging>
 
 	<artifactId>jenkins-cloudformation-plugin</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.3-SNAPSHOT</version>
 	
 	<url>https://wiki.jenkins-ci.org/display/JENKINS/AWS+Cloudformation+Plugin</url>
 
@@ -25,9 +25,9 @@
 
 	<developers>
 		<developer>
-			<id>edovale</id>
-			<name>Erick Dovale</name>
-			<email>edovale@gmail.com</email>
+			<id>nathanagood</id>
+			<name>Nathan A. Good</name>
+			<email>nathan.a.good@gmail.com</email>
 			<timezone>-5</timezone>
 		</developer>
 	</developers>
@@ -95,6 +95,20 @@
 		          <artifactId>maven-release-plugin</artifactId>
 		          <version>2.3.2</version>
 		      </plugin>
+              <plugin>
+                  <groupId>org.jenkins-ci.tools</groupId>
+                  <artifactId>maven-hpi-plugin</artifactId>
+                  <configuration>
+                      <disabledTestInjection>true</disabledTestInjection>
+                  </configuration>
+              </plugin>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-javadoc-plugin</artifactId>
+                  <configuration>
+                      <additionalparam>-Xdoclint:none</additionalparam>
+                  </configuration>
+              </plugin>
 		  </plugins>
 		</pluginManagement>
 	</build>

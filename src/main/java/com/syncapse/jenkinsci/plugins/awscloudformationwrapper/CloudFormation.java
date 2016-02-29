@@ -11,7 +11,9 @@ import java.util.Map;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.retry.RetryUtils;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
@@ -34,6 +36,8 @@ import com.amazonaws.services.cloudformation.model.StackSummary;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.google.common.collect.Lists;
 import hudson.EnvVars;
+import hudson.ProxyConfiguration;
+import hudson.model.Hudson;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -64,7 +68,6 @@ public class CloudFormation {
     private String awsSecretKey;
     private PrintStream logger;
     private AmazonCloudFormation amazonClient;
-    private Stack stack;
     private boolean autoDeleteStack;
     private EnvVars envVars;
     private Region awsRegion;
@@ -187,10 +190,12 @@ public class CloudFormation {
 
         logger.println("Determining to create or update Cloud Formation stack: " + getExpandedStackName());
 
+        Stack stack = null;
+
         try {
             try {
                 DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(getExpandedStackName());
-                Stack stack = getStack(amazonClient.describeStacks(describeStacksRequest));
+                stack = getStack(amazonClient.describeStacks(describeStacksRequest));
             } catch (AmazonServiceException e) {
                 logger.println("Stack not found: " + getExpandedStackName() + ". Reason: " + detailedError(e));
             } catch (AmazonClientException e) {
@@ -250,14 +255,32 @@ public class CloudFormation {
     protected AmazonCloudFormation getAWSClient() {
         AWSCredentials credentials = new BasicAWSCredentials(this.awsAccessKey,
                 this.awsSecretKey);
-        AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
-                credentials);
-        amazonClient.setEndpoint(awsRegion.endPoint);
-        return amazonClient;
+        Hudson hudson = Hudson.getInstance(); 
+        ProxyConfiguration proxyConfig = hudson != null ? hudson.proxy : null;
+        if (proxyConfig != null && proxyConfig.name != null) {
+           ClientConfiguration config = new ClientConfiguration();
+           config.setProxyHost(proxyConfig.name);
+           config.setProxyPort(proxyConfig.port);
+           config.setProxyUsername(proxyConfig.getUserName());
+           config.setProxyPassword(proxyConfig.getPassword());
+           config.setPreemptiveBasicProxyAuth(true);
+           AWSCredentialsProvider provider = new BasicAWSCredentialsProvider(credentials);
+           AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
+                   provider, config);
+   
+           amazonClient.setEndpoint(awsRegion.endPoint);
+           return amazonClient;
+        } else {
+          AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
+                  credentials);
+          amazonClient.setEndpoint(awsRegion.endPoint);
+          return amazonClient;
+        }
     }
 
     private boolean waitForStackToBeDeleted() {
         int retries = 1;
+        Stack stack = null;
         while (true) {
             try {
 
@@ -284,7 +307,7 @@ public class CloudFormation {
                     throw ase;
                 }
             }
-            sleep(retries);
+            sleep(stack, retries);
             retries++;
         }
 
@@ -327,7 +350,7 @@ public class CloudFormation {
                     if (isTimeout(startTime)) {
                         throw new TimeoutException("Timed out waiting for stack to be created. (timeout=" + timeout + ")");
                     }
-                    sleep(retries);
+                    sleep(stack, retries);
                 }
             } catch (AmazonServiceException ase) {
                 if (!RetryUtils.isThrottlingException(ase)) {
@@ -337,7 +360,7 @@ public class CloudFormation {
                     throw new TimeoutException("Timed out waiting for stack to be created. (timeout=" + timeout + ")");
                 }
                 logger.println("Stack status request throttled; retrying.");
-                sleep(retries);
+                sleep(stack, retries);
             }
             retries++;
         }
@@ -377,7 +400,7 @@ public class CloudFormation {
     }
 
     private boolean isStackCreationSuccessful(StackStatus status) {
-        return status == StackStatus.CREATE_COMPLETE || status == StackStatus.UPDATE_COMPLETE;
+        return status == StackStatus.CREATE_COMPLETE || status == StackStatus.UPDATE_COMPLETE || status == StackStatus.UPDATE_COMPLETE_CLEANUP_IN_PROGRESS;
     }
 
     private long getWaitBetweenAttempts (int retries) {
@@ -388,7 +411,7 @@ public class CloudFormation {
         }
     }
 
-    private void sleep(int retries) {
+    private void sleep(Stack stack, int retries) {
         try {
             Thread.sleep(getWaitBetweenAttempts(retries));
         } catch (InterruptedException e) {
@@ -530,4 +553,22 @@ public class CloudFormation {
         }
         return false;
     }
+}
+
+class BasicAWSCredentialsProvider implements AWSCredentialsProvider {
+   
+   AWSCredentials awsCredentials;
+   
+   public BasicAWSCredentialsProvider(AWSCredentials awsCredentials) {
+       this.awsCredentials = awsCredentials;
+   }
+   
+   public AWSCredentials getCredentials() {
+       return awsCredentials;
+   }
+   
+   public void refresh() {
+       
+   }
+   
 }
