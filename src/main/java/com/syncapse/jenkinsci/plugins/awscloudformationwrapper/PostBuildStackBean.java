@@ -150,6 +150,10 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 		return env.expand(getAwsSecretKey());
 	}
 
+	public String getParsedCloudFormationRecipe(EnvVars env) {
+		return env.expand(getCloudFormationRecipe());
+	}
+
 	@Extension
 	public static final class DescriptorImpl extends Descriptor<PostBuildStackBean>{
 		

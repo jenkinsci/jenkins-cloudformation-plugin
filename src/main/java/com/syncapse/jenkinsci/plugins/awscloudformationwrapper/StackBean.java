@@ -151,6 +151,10 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		return env.expand(getAwsSecretKey());
 	}
 
+	public String getParsedCloudFormationRecipe(EnvVars env) {
+		return env.expand(getCloudFormationRecipe());
+	}
+
 	@Extension
 	public static final class DescriptorImpl extends Descriptor<StackBean>{
 		
