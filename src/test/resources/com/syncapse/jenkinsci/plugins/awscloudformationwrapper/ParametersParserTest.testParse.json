@@ -1,0 +1,10 @@
+[
+    {
+        "parameterKey": "KeyPairName",
+        "parameterValue": "MyKey"
+    },
+    {
+        "parameterKey": "InstanceType",
+        "usePreviousValue": true
+    }
+]

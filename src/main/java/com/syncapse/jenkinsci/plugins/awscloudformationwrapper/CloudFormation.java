@@ -75,6 +75,7 @@ public class CloudFormation {
     private Boolean isTagFilterOn;
     private Map<String, String> outputs;
     private long sleep=0;
+    private ParametersConverter parametersConverter = new ParametersConverter();
 
     /**
      * @param logger a logger to write progress information.
@@ -99,7 +100,32 @@ public class CloudFormation {
         this.stackName = stackName;
         this.isRecipeURL = isRecipeURL;
         this.recipe = recipeBody;
-        this.parameters = parameters(parameters);
+        this.parameters = parametersConverter.convert(parameters);
+        this.awsAccessKey = awsAccessKey;
+        this.awsSecretKey = awsSecretKey;
+        this.awsRegion = region != null ? region : Region.getDefault();
+        this.isPrefixSelected = isPrefixSelected;
+
+        if (timeout == -12345) {
+            this.timeout = 0; // Faster testing.
+        } else {
+            this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
+        }
+        this.amazonClient = getAWSClient();
+        this.autoDeleteStack = autoDeleteStack;
+        this.envVars = envVars;
+    }
+
+    public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
+            String recipeBody, List<Parameter> parameters,
+            long timeout, String awsAccessKey, String awsSecretKey, Region region,
+            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected) {
+
+        this.logger = logger;
+        this.stackName = stackName;
+        this.isRecipeURL = isRecipeURL;
+        this.recipe = recipeBody;
+        this.parameters = parameters;
         this.awsAccessKey = awsAccessKey;
         this.awsSecretKey = awsSecretKey;
         this.awsRegion = region != null ? region : Region.getDefault();
@@ -115,8 +141,9 @@ public class CloudFormation {
         this.envVars = envVars;
     
     }
+
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
-            String recipeBody, Map<String, String> parameters,
+            String recipeBody, List<Parameter> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
             EnvVars envVars, Boolean isPrefixSelected,long sleep) {
 
@@ -124,7 +151,7 @@ public class CloudFormation {
         this.stackName = stackName;
         this.isRecipeURL = isRecipeURL;
         this.recipe = recipeBody;
-        this.parameters = parameters(parameters);
+        this.parameters = parameters;
         this.awsAccessKey = awsAccessKey;
         this.awsSecretKey = awsSecretKey;
         this.awsRegion = region != null ? region : Region.getDefault();
@@ -140,8 +167,17 @@ public class CloudFormation {
         this.sleep=sleep;
     
     }
+
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters, long timeout,
+            String awsAccessKey, String awsSecretKey, boolean autoDeleteStack,
+            EnvVars envVars, Boolean isPrefixSelected) {
+        this(logger, stackName, isRecipeURL, recipeBody, parameters, timeout, awsAccessKey,
+            awsSecretKey, null, autoDeleteStack, envVars, isPrefixSelected);
+    }
+
+    public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
+            String recipeBody, List<Parameter> parameters, long timeout,
             String awsAccessKey, String awsSecretKey, boolean autoDeleteStack,
             EnvVars envVars, Boolean isPrefixSelected) {
         this(logger, stackName, isRecipeURL, recipeBody, parameters, timeout, awsAccessKey,
@@ -310,24 +346,6 @@ public class CloudFormation {
             retries++;
         }
 
-    }
-
-    private List<Parameter> parameters(Map<String, String> parameters) {
-
-        if (parameters == null || parameters.values().size() == 0) {
-            return null;
-        }
-
-        List<Parameter> result = Lists.newArrayList();
-        Parameter parameter = null;
-        for (String name : parameters.keySet()) {
-            parameter = new Parameter();
-            parameter.setParameterKey(name);
-            parameter.setParameterValue(parameters.get(name));
-            result.add(parameter);
-        }
-
-        return result;
     }
 
     private Stack waitForStackToBeCreated() throws TimeoutException {

@@ -1,5 +1,9 @@
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
@@ -7,11 +11,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -60,15 +59,18 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 	private String awsSecretKey;
 
         
-        private long sleep;
+	private long sleep;
 
     
     private Region awsRegion;
+
+
+	private String parametersFile;
 	
 	@DataBoundConstructor
 	public PostBuildStackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, Region awsRegion,long sleep) {
+			String awsAccessKey, String awsSecretKey, Region awsRegion,long sleep, String parametersFile) {
 		super();
 		this.stackName = stackName;
 		this.description = description;
@@ -77,8 +79,9 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 		this.timeout = timeout;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
-                this.sleep=sleep;
+		this.sleep=sleep;
         this.awsRegion = awsRegion;
+        this.parametersFile = parametersFile;
 	}
 
 	public String getStackName() {
@@ -121,7 +124,7 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 		
 		if (parameters == null || parameters.isEmpty())
 			return new HashMap<String, String>();
-		
+
 		Map<String, String> result = new HashMap<String, String>();
 		String token[] = null;
 		
@@ -140,7 +143,15 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 		}
 		return result;
 	}
-	
+
+	public String getParametersFile() {
+		return parametersFile;
+	}
+
+	public void setParametersFile(String parametersFile) {
+		this.parametersFile = parametersFile;
+	}
+
 	public String getParsedAwsAccessKey(EnvVars env) {
 		return env.expand(getAwsAccessKey());
 	}

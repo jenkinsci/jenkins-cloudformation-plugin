@@ -4,7 +4,19 @@
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
-import static com.syncapse.jenkinsci.plugins.awscloudformationwrapper.CloudFormationPostBuildNotifier.DESCRIPTOR;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import com.amazonaws.services.cloudformation.model.Parameter;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -15,14 +27,6 @@ import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Builder;
-import hudson.tasks.Notifier;
-import hudson.tasks.Publisher;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Logger;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -96,6 +100,7 @@ public class CloudFormationBuildStep extends Builder{
 		}
 		return result;
 	}
+
 	protected CloudFormation newCloudFormation(PostBuildStackBean postBuildStackBean,
 			AbstractBuild<?, ?> build, EnvVars env, PrintStream logger)
 			throws IOException {
@@ -109,13 +114,39 @@ public class CloudFormationBuildStep extends Builder{
 			recipe = build.getWorkspace().child(postBuildStackBean.getCloudFormationRecipe()).readToString();
 		}
 
+		List<Parameter> mergedParameters = Collections.emptyList();
+		Map<String, String> parsedParameters = postBuildStackBean.getParsedParameters(env);
+		if (parsedParameters != null) {
+			mergedParameters = new ParametersConverter().convert(parsedParameters);
+		}
+
+		if (postBuildStackBean.getParametersFile() != null && !postBuildStackBean.getParametersFile().isEmpty()) {
+			String parametersJsonString = build.getWorkspace().child(postBuildStackBean.getParametersFile()).readToString();
+			List<Parameter> fileParameters = new ParametersParser().parse(parametersJsonString);
+
+			mergedParameters = mergeParameters(mergedParameters, fileParameters);
+		}
+
 		return new CloudFormation(logger, postBuildStackBean.getStackName(), isURL,
-				recipe, postBuildStackBean.getParsedParameters(env),
+				recipe, mergedParameters,
 				postBuildStackBean.getTimeout(), postBuildStackBean.getParsedAwsAccessKey(env),
 				postBuildStackBean.getParsedAwsSecretKey(env),
 				postBuildStackBean.getAwsRegion(), env,false,postBuildStackBean.getSleep());
 
 	}
+
+	private List<Parameter> mergeParameters(List<Parameter> first, List<Parameter> second) {
+		Map<String, Parameter> result = new LinkedHashMap<>();
+
+		Map<String, Parameter> firstMap = first.stream().collect(Collectors.toMap(Parameter::getParameterKey, Function.identity()));
+		result.putAll(firstMap);
+
+		Map<String, Parameter> secondMap = second.stream().collect(Collectors.toMap(Parameter::getParameterKey, Function.identity()));
+		result.putAll(secondMap);
+
+		return new ArrayList<>(result.values());
+	}
+
 	@Override
 	public BuildStepDescriptor getDescriptor() {
 		return DESCRIPTOR;
