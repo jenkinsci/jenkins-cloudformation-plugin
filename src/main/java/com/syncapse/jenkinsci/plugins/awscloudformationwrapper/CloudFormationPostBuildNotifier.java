@@ -4,7 +4,6 @@
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
-import static com.syncapse.jenkinsci.plugins.awscloudformationwrapper.CloudFormationPostBuildNotifier.DESCRIPTOR;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -16,13 +15,13 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import org.kohsuke.stapler.DataBoundConstructor;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  *

@@ -6,15 +6,11 @@ package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.amazonaws.services.cloudformation.model.Parameter;
 import hudson.EnvVars;
@@ -117,14 +113,14 @@ public class CloudFormationBuildStep extends Builder{
 		List<Parameter> mergedParameters = Collections.emptyList();
 		Map<String, String> parsedParameters = postBuildStackBean.getParsedParameters(env);
 		if (parsedParameters != null) {
-			mergedParameters = new ParametersConverter().convert(parsedParameters);
+			mergedParameters = ParameterUtils.convert(parsedParameters);
 		}
 
 		if (postBuildStackBean.getParametersFile() != null && !postBuildStackBean.getParametersFile().isEmpty()) {
 			String parametersJsonString = build.getWorkspace().child(postBuildStackBean.getParametersFile()).readToString();
-			List<Parameter> fileParameters = new ParametersParser().parse(parametersJsonString);
+			List<Parameter> fileParameters = ParameterUtils.parse(parametersJsonString);
 
-			mergedParameters = mergeParameters(mergedParameters, fileParameters);
+			mergedParameters = ParameterUtils.merge(mergedParameters, fileParameters);
 		}
 
 		return new CloudFormation(logger, postBuildStackBean.getStackName(), isURL,
@@ -133,18 +129,6 @@ public class CloudFormationBuildStep extends Builder{
 				postBuildStackBean.getParsedAwsSecretKey(env),
 				postBuildStackBean.getAwsRegion(), env,false,postBuildStackBean.getSleep());
 
-	}
-
-	private List<Parameter> mergeParameters(List<Parameter> first, List<Parameter> second) {
-		Map<String, Parameter> result = new LinkedHashMap<>();
-
-		Map<String, Parameter> firstMap = first.stream().collect(Collectors.toMap(Parameter::getParameterKey, Function.identity()));
-		result.putAll(firstMap);
-
-		Map<String, Parameter> secondMap = second.stream().collect(Collectors.toMap(Parameter::getParameterKey, Function.identity()));
-		result.putAll(secondMap);
-
-		return new ArrayList<>(result.values());
 	}
 
 	@Override

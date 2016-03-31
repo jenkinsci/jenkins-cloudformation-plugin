@@ -75,7 +75,32 @@ public class CloudFormation {
     private Boolean isTagFilterOn;
     private Map<String, String> outputs;
     private long sleep=0;
-    private ParametersConverter parametersConverter = new ParametersConverter();
+
+    public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
+                          String recipeBody, Map<String, String> parameters,
+                          long timeout, String awsAccessKey, String awsSecretKey, Region region,
+                          EnvVars envVars, Boolean isPrefixSelected,long sleep) {
+
+        this.logger = logger;
+        this.stackName = stackName;
+        this.isRecipeURL = isRecipeURL;
+        this.recipe = recipeBody;
+        this.parameters = ParameterUtils.convert(parameters);
+        this.awsAccessKey = awsAccessKey;
+        this.awsSecretKey = awsSecretKey;
+        this.awsRegion = region != null ? region : Region.getDefault();
+        this.isPrefixSelected = isPrefixSelected;
+        if (timeout == -12345) {
+            this.timeout = 0; // Faster testing.
+        } else {
+            this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
+        }
+        this.amazonClient = getAWSClient();
+        this.autoDeleteStack = false;
+        this.envVars = envVars;
+        this.sleep=sleep;
+
+    }
 
     /**
      * @param logger a logger to write progress information.
@@ -92,15 +117,15 @@ public class CloudFormation {
      * @param awsSecretKey the AWS API Secret Key.
      */
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
-            String recipeBody, Map<String, String> parameters,
-            long timeout, String awsAccessKey, String awsSecretKey, Region region,
+            String recipeBody, Map<String, String> parameters, long timeout,
+            String awsAccessKey, String awsSecretKey, Region region,
             boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected) {
 
         this.logger = logger;
         this.stackName = stackName;
         this.isRecipeURL = isRecipeURL;
         this.recipe = recipeBody;
-        this.parameters = parametersConverter.convert(parameters);
+        this.parameters = ParameterUtils.convert(parameters);
         this.awsAccessKey = awsAccessKey;
         this.awsSecretKey = awsSecretKey;
         this.awsRegion = region != null ? region : Region.getDefault();
