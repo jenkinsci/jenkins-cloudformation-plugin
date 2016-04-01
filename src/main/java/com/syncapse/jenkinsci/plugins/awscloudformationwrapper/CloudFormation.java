@@ -104,7 +104,7 @@ public class CloudFormation {
         this.awsSecretKey = awsSecretKey;
         this.awsRegion = region != null ? region : Region.getDefault();
         this.isPrefixSelected = isPrefixSelected;
-
+        
         if (timeout == -12345) {
             this.timeout = 0; // Faster testing.
         } else {
@@ -264,7 +264,7 @@ public class CloudFormation {
     protected AmazonCloudFormation getAWSClient() {
         AWSCredentials credentials = new BasicAWSCredentials(this.awsAccessKey,
                 this.awsSecretKey);
-        Hudson hudson = Hudson.getInstance();
+        Hudson hudson = Hudson.getInstance(); 
         ProxyConfiguration proxyConfig = hudson != null ? hudson.proxy : null;
         if (proxyConfig != null && proxyConfig.name != null) {
            ClientConfiguration config = new ClientConfiguration();
@@ -276,7 +276,7 @@ public class CloudFormation {
            AWSCredentialsProvider provider = new BasicAWSCredentialsProvider(credentials);
            AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
                    provider, config);
-
+   
            amazonClient.setEndpoint(awsRegion.endPoint);
            return amazonClient;
         } else {
@@ -310,7 +310,7 @@ public class CloudFormation {
               }
 
               logger.println("Stack status " + stackStatus + ".");
-
+              
             } catch (AmazonServiceException ase) {
                 if (!RetryUtils.isThrottlingException(ase)) {
                     throw ase;
@@ -446,7 +446,7 @@ public class CloudFormation {
 
         return r;
 	}
-
+	
     public Map<String, String> getOutputs() {
         // Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
         HashMap<String, String> map = new HashMap<String, String>();
@@ -486,7 +486,7 @@ public class CloudFormation {
                 stackToDelete = summary.getStackName();
             }
         }
-
+        
         return stackToDelete;
     }
 
@@ -538,19 +538,19 @@ public class CloudFormation {
 }
 
 class BasicAWSCredentialsProvider implements AWSCredentialsProvider {
-
+   
    AWSCredentials awsCredentials;
-
+   
    public BasicAWSCredentialsProvider(AWSCredentials awsCredentials) {
        this.awsCredentials = awsCredentials;
    }
-
+   
    public AWSCredentials getCredentials() {
        return awsCredentials;
    }
-
+   
    public void refresh() {
-
+       
    }
-
+   
 }
