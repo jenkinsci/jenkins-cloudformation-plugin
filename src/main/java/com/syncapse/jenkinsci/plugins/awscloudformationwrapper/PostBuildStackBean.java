@@ -1,9 +1,5 @@
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
@@ -11,6 +7,11 @@ import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -59,12 +60,14 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 	private String awsSecretKey;
 
         
-	private long sleep;
+        private long sleep;
 
     
     private Region awsRegion;
 
-
+	/**
+	 * The file containing parameters to be passed into the cloud formation.
+	 */
 	private String parametersFile;
 	
 	@DataBoundConstructor
@@ -80,8 +83,8 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
 		this.sleep=sleep;
-        this.awsRegion = awsRegion;
-        this.parametersFile = parametersFile;
+		this.awsRegion = awsRegion;
+		this.parametersFile = parametersFile;
 	}
 
 	public String getStackName() {
@@ -124,7 +127,7 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 		
 		if (parameters == null || parameters.isEmpty())
 			return new HashMap<String, String>();
-
+		
 		Map<String, String> result = new HashMap<String, String>();
 		String token[] = null;
 		

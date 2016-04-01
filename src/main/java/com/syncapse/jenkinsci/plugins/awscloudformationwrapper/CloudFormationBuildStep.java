@@ -56,7 +56,7 @@ public class CloudFormationBuildStep extends Builder{
 		return super.prebuild(build, listener);
 	}
 
-
+       
 	@Override
 	public Action getProjectAction(AbstractProject<?, ?> project) {
 		LOGGER.info("getProjectAction");
@@ -68,16 +68,16 @@ public class CloudFormationBuildStep extends Builder{
 		LOGGER.info("getProjectActions");
 		return super.getProjectActions(project);
 	}
-
+  
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		EnvVars envVars = build.getEnvironment(listener);
                 envVars.overrideAll(build.getBuildVariables());
 		boolean result = true;
-
-
+                  
+                 
 		for (PostBuildStackBean stack : stacks) {
-		final CloudFormation cloudFormation = newCloudFormation(stack,build, envVars, listener.getLogger());
+		final CloudFormation cloudFormation = newCloudFormation(stack,build, envVars, listener.getLogger());	
                     /*CloudFormation cloudFormation = new CloudFormation(
 					listener.getLogger(),
 					stack.getStackName(),
@@ -99,7 +99,6 @@ public class CloudFormationBuildStep extends Builder{
 		}
 		return result;
 	}
-
 	protected CloudFormation newCloudFormation(PostBuildStackBean postBuildStackBean,
 			AbstractBuild<?, ?> build, EnvVars env, PrintStream logger)
 			throws IOException {
@@ -133,7 +132,6 @@ public class CloudFormationBuildStep extends Builder{
 				postBuildStackBean.getAwsRegion(), env,false,postBuildStackBean.getSleep());
 
 	}
-
 	@Override
 	public BuildStepDescriptor getDescriptor() {
 		return DESCRIPTOR;
@@ -146,7 +144,7 @@ public class CloudFormationBuildStep extends Builder{
 
 		@Override
 		public String getDisplayName() {
-
+                    
 			return "AWS Cloud Formation";
 		}
 
@@ -154,6 +152,6 @@ public class CloudFormationBuildStep extends Builder{
 		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
 			return true;
 		}
-
+                
 	}
 }
