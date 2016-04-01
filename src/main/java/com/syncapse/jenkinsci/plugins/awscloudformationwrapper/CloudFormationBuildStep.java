@@ -4,14 +4,7 @@
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
+import static com.syncapse.jenkinsci.plugins.awscloudformationwrapper.CloudFormationPostBuildNotifier.DESCRIPTOR;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -23,6 +16,16 @@ import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Builder;
+import hudson.tasks.Notifier;
+import hudson.tasks.Publisher;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -53,7 +56,7 @@ public class CloudFormationBuildStep extends Builder{
 		return super.prebuild(build, listener);
 	}
 
-       
+
 	@Override
 	public Action getProjectAction(AbstractProject<?, ?> project) {
 		LOGGER.info("getProjectAction");
@@ -65,16 +68,16 @@ public class CloudFormationBuildStep extends Builder{
 		LOGGER.info("getProjectActions");
 		return super.getProjectActions(project);
 	}
-  
+
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		EnvVars envVars = build.getEnvironment(listener);
                 envVars.overrideAll(build.getBuildVariables());
 		boolean result = true;
-                  
-                 
+
+
 		for (PostBuildStackBean stack : stacks) {
-		final CloudFormation cloudFormation = newCloudFormation(stack,build, envVars, listener.getLogger());	
+		final CloudFormation cloudFormation = newCloudFormation(stack,build, envVars, listener.getLogger());
                     /*CloudFormation cloudFormation = new CloudFormation(
 					listener.getLogger(),
 					stack.getStackName(),
@@ -143,7 +146,7 @@ public class CloudFormationBuildStep extends Builder{
 
 		@Override
 		public String getDisplayName() {
-                    
+
 			return "AWS Cloud Formation";
 		}
 
@@ -151,6 +154,6 @@ public class CloudFormationBuildStep extends Builder{
 		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
 			return true;
 		}
-                
+
 	}
 }
