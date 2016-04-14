@@ -75,7 +75,7 @@ public class CloudFormation {
     private Boolean isTagFilterOn;
     private Map<String, String> outputs;
     private long sleep=0;
-    private long checkInterval=60;
+    private long checkInterval=0;
 
     /**
      * @param logger a logger to write progress information.
