@@ -94,7 +94,33 @@ public class CloudFormation {
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
-            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected,long checkInterval) {
+            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected) {
+
+        this.logger = logger;
+        this.stackName = stackName;
+        this.isRecipeURL = isRecipeURL;
+        this.recipe = recipeBody;
+        this.parameters = parameters(parameters);
+        this.awsAccessKey = awsAccessKey;
+        this.awsSecretKey = awsSecretKey;
+        this.awsRegion = region != null ? region : Region.getDefault();
+        this.isPrefixSelected = isPrefixSelected;
+
+        if (timeout == -12345) {
+            this.timeout = 0; // Faster testing.
+        } else {
+            this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
+        }
+        this.amazonClient = getAWSClient();
+        this.autoDeleteStack = autoDeleteStack;
+        this.envVars = envVars;
+
+    }
+
+    public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
+                          String recipeBody, Map<String, String> parameters,
+                          long timeout, String awsAccessKey, String awsSecretKey, Region region,
+                          boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected,long checkInterval) {
 
         this.logger = logger;
         this.stackName = stackName;
@@ -117,6 +143,7 @@ public class CloudFormation {
         this.envVars = envVars;
 
     }
+
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
