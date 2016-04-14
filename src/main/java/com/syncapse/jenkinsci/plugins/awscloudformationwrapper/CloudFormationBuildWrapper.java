@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
@@ -24,7 +24,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * @author erickdovale
- * 
+ *
  */
 public class CloudFormationBuildWrapper extends BuildWrapper {
 
@@ -53,9 +53,9 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
         EnvVars env = build.getEnvironment(listener);
         env.overrideAll(build.getBuildVariables());
-        
+
         boolean success = true;
-        
+
 		for (StackBean stackBean : stacks) {
 
 			final CloudFormation cloudFormation = newCloudFormation(stackBean,
@@ -81,7 +81,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 			}
 
 		}
-		
+
 		// If any stack fails to create then destroy them all
 		if (!success) {
 			doTearDown();
@@ -94,12 +94,12 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 					throws IOException, InterruptedException {
 
 				return doTearDown();
-				
+
 			}
 
 		};
 	}
-	
+
 	protected boolean doTearDown() throws IOException, InterruptedException{
 		boolean result = true;
 
@@ -123,7 +123,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
 		Boolean isURL = false;
 		String recipe = null;
-		
+
 		if(CloudFormation.isRecipeURL(stackBean.getCloudFormationRecipe())) {
 			isURL = true;
 			recipe = stackBean.getCloudFormationRecipe();
@@ -135,8 +135,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 				recipe, stackBean.getParsedParameters(env),
 				stackBean.getTimeout(), stackBean.getParsedAwsAccessKey(env),
 				stackBean.getParsedAwsSecretKey(env),
-				stackBean.getAwsRegion(), stackBean.getAutoDeleteStack(), env,false);
-
+				stackBean.getAwsRegion(), stackBean.getAutoDeleteStack(), env, false, stackBean.getCheckInterval());
 	}
 
 	@Extension
@@ -151,7 +150,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 		public boolean isApplicable(AbstractProject<?, ?> item) {
 			return true;
 		}
-		
+
 	}
 
 	public List<StackBean> getStacks() {
@@ -162,9 +161,9 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	 * @return
 	 */
 	private Object readResolve() {
-		// Initialize the cloud formation collection during deserialization to avoid NPEs. 
+		// Initialize the cloud formation collection during deserialization to avoid NPEs.
 		cloudFormations = new ArrayList<CloudFormation>();
 		return this;
 	}
-	
+
 }

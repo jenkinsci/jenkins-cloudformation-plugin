@@ -75,6 +75,7 @@ public class CloudFormation {
     private Boolean isTagFilterOn;
     private Map<String, String> outputs;
     private long sleep=0;
+    private long checkInterval=60;
 
     /**
      * @param logger a logger to write progress information.
@@ -93,7 +94,7 @@ public class CloudFormation {
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
-            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected) {
+            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected,long checkInterval) {
 
         this.logger = logger;
         this.stackName = stackName;
@@ -104,7 +105,8 @@ public class CloudFormation {
         this.awsSecretKey = awsSecretKey;
         this.awsRegion = region != null ? region : Region.getDefault();
         this.isPrefixSelected = isPrefixSelected;
-        
+        this.checkInterval = checkInterval;
+
         if (timeout == -12345) {
             this.timeout = 0; // Faster testing.
         } else {
@@ -113,12 +115,12 @@ public class CloudFormation {
         this.amazonClient = getAWSClient();
         this.autoDeleteStack = autoDeleteStack;
         this.envVars = envVars;
-    
+
     }
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
-            EnvVars envVars, Boolean isPrefixSelected,long sleep) {
+            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected, long sleep,long checkInterval) {
 
         this.logger = logger;
         this.stackName = stackName;
@@ -138,14 +140,15 @@ public class CloudFormation {
         this.autoDeleteStack = false;
         this.envVars = envVars;
         this.sleep=sleep;
-    
+        this.checkInterval=checkInterval;
     }
+
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters, long timeout,
             String awsAccessKey, String awsSecretKey, boolean autoDeleteStack,
-            EnvVars envVars, Boolean isPrefixSelected) {
+            EnvVars envVars, Boolean isPrefixSelected, long checkInterval) {
         this(logger, stackName, isRecipeURL, recipeBody, parameters, timeout, awsAccessKey,
-                awsSecretKey, null, autoDeleteStack, envVars, isPrefixSelected);
+                awsSecretKey, null, autoDeleteStack, envVars, isPrefixSelected, checkInterval);
     }
 
     /**
@@ -300,7 +303,7 @@ public class CloudFormation {
               }
 
               logger.println("Stack status " + stackStatus + ".");
-              
+
             } catch (AmazonServiceException ase) {
                 if (!RetryUtils.isThrottlingException(ase)) {
                     throw ase;
@@ -334,17 +337,26 @@ public class CloudFormation {
 
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(getExpandedStackName());
         StackStatus status = StackStatus.CREATE_IN_PROGRESS;
+        StackStatus newStatus = null;
         Stack stack = null;
         long startTime = System.currentTimeMillis();
         int retries = 1;
         long subTime = startTime, lastTime;
+
         while (isStackCreationInProgress(status)) {
             lastTime = subTime;
             subTime = System.currentTimeMillis();
+
             try {
                 stack = getStack(amazonClient.describeStacks(describeStacksRequest));
-                status = getStackStatus(stack.getStackStatus());
-                logger.println("Stack status " + status + ". ( " + (subTime - lastTime) + "ms since previous check)");
+                newStatus = getStackStatus(stack.getStackStatus());
+                if (newStatus != status) {
+                    status = newStatus;
+                    logger.println("\nStack status " + status);
+                } else {
+                    logger.print(".");
+                }
+
                 if (isStackCreationInProgress(status)) {
                     if (isTimeout(startTime)) {
                         throw new TimeoutException("Timed out waiting for stack to be created. (timeout=" + timeout + ")");
@@ -405,6 +417,8 @@ public class CloudFormation {
     private long getWaitBetweenAttempts (int retries) {
         if (timeout == 0) {
             return 0;
+        } else if (checkInterval > 0) {
+            return TimeUnit.SECONDS.toMillis(checkInterval);
         } else {
             return (long) Math.min(Math.pow(2, retries) * 100L, 300000);
         }
@@ -454,7 +468,7 @@ public class CloudFormation {
 
         return r;
 	}
-	
+
     public Map<String, String> getOutputs() {
         // Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
         HashMap<String, String> map = new HashMap<String, String>();
@@ -494,7 +508,7 @@ public class CloudFormation {
                 stackToDelete = summary.getStackName();
             }
         }
-        
+
         return stackToDelete;
     }
 
