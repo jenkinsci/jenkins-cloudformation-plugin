@@ -100,7 +100,7 @@ public class CloudFormationPostBuildNotifier extends Notifier{
         recipe, postBuildStackBean.getParsedParameters(env),
         postBuildStackBean.getTimeout(), postBuildStackBean.getParsedAwsAccessKey(env),
         postBuildStackBean.getParsedAwsSecretKey(env),
-        postBuildStackBean.getAwsRegion(), false, env, false, postBuildStackBean.getSleep());
+        postBuildStackBean.getAwsRegion(), false, env, false, postBuildStackBean.getSleep(), postBuildStackBean.getCheckInterval());
 
 	}
 	@Override

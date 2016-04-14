@@ -50,6 +50,11 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 	private long timeout;
 
 	/**
+	 * Number of seconds to wait before checking with AWS for stack progress
+	 */
+	private long checkInterval;
+
+	/**
 	 * The access key to call Amazon's APIs
 	 */
 	private String awsAccessKey;
@@ -68,7 +73,7 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 	@DataBoundConstructor
 	public PostBuildStackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, Region awsRegion,long sleep) {
+			String awsAccessKey, String awsSecretKey, Region awsRegion,long sleep, long checkInterval) {
 		super();
 		this.stackName = stackName;
 		this.description = description;
@@ -77,6 +82,7 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 		this.timeout = timeout;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
+		this.checkInterval = checkInterval;
     this.sleep=sleep;
     this.awsRegion = awsRegion;
 	}
@@ -100,6 +106,11 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 	public long getTimeout() {
 		return timeout;
 	}
+
+	public long getCheckInterval() {
+		return checkInterval;
+	}
+
 
 	public String getAwsAccessKey() {
 		return awsAccessKey;
@@ -182,6 +193,20 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 			}
 			return FormValidation.ok();
 		}
+
+		public FormValidation doCheckCheckInterval(
+				@AncestorInPath AbstractProject<?, ?> project,
+				@QueryParameter String value) throws IOException {
+			if (value.length() > 0) {
+				try {
+					Long.parseLong(value);
+				} catch (NumberFormatException e) {
+					return FormValidation.error("Timeout value "+ value + " is not a number.");
+				}
+			}
+			return FormValidation.ok();
+		}
+
 	public FormValidation doCheckSleep(
 				@AncestorInPath AbstractProject<?, ?> project,
 				@QueryParameter String value) throws IOException {
