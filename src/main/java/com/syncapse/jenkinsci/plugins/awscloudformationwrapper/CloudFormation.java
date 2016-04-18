@@ -75,6 +75,7 @@ public class CloudFormation {
     private Boolean isTagFilterOn;
     private Map<String, String> outputs;
     private long sleep=0;
+    private long retainStacksQty = 1;
 
     /**
      * @param logger a logger to write progress information.
@@ -115,6 +116,34 @@ public class CloudFormation {
         this.envVars = envVars;
     
     }
+
+    public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
+                          String recipeBody, Map<String, String> parameters,
+                          long timeout, String awsAccessKey, String awsSecretKey, Region region,
+                          boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected, long retainStacksQty) {
+
+        this.logger = logger;
+        this.stackName = stackName;
+        this.isRecipeURL = isRecipeURL;
+        this.recipe = recipeBody;
+        this.parameters = parameters(parameters);
+        this.awsAccessKey = awsAccessKey;
+        this.awsSecretKey = awsSecretKey;
+        this.awsRegion = region != null ? region : Region.getDefault();
+        this.isPrefixSelected = isPrefixSelected;
+
+        if (timeout == -12345) {
+            this.timeout = 0; // Faster testing.
+        } else {
+            this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
+        }
+        this.amazonClient = getAWSClient();
+        this.autoDeleteStack = autoDeleteStack;
+        this.envVars = envVars;
+        this.retainStacksQty = retainStacksQty;
+
+    }
+
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
@@ -140,6 +169,7 @@ public class CloudFormation {
         this.sleep=sleep;
     
     }
+
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters, long timeout,
             String awsAccessKey, String awsSecretKey, boolean autoDeleteStack,
@@ -163,9 +193,20 @@ public class CloudFormation {
      * @return
      */
     public boolean delete() {
+        String oldestStack;
         if (isPrefixSelected) {
-            stackName = getOldestStackNameWithPrefix();
+            oldestStack = getOldestStackNameWithPrefix();
+            if (oldestStack == null) {
+                logger.println("Cloud Formation stack prefix :'" + getExpandedStackName() + "'"
+                        + ", did not match an valid stack that is eligible for deletion");
+                // return true to prevent build fail
+                return true;
+            }
+            stackName = oldestStack;
         }
+
+
+
         logger.println("Deleting Cloud Formation stack: " + getExpandedStackName());
         DeleteStackRequest deleteStackRequest = new DeleteStackRequest();
         deleteStackRequest.withStackName(getExpandedStackName());
@@ -175,6 +216,7 @@ public class CloudFormation {
         logger.println("Cloud Formation stack: " + getExpandedStackName()
                 + (result ? " deleted successfully" : " failed deleting."));
         return result;
+
     }
 
     /**
@@ -477,25 +519,25 @@ public class CloudFormation {
                 filteredStackSummries.add(summary);
             }
         }
-        if (filteredStackSummries.isEmpty() || filteredStackSummries.size() == 1) {
-            return stackName;
+        if (filteredStackSummries.isEmpty() || filteredStackSummries.size() <= retainStacksQty) {
+            return null;
         }
         return returnOldestStackName(filteredStackSummries);
 
     }
 
-    private String returnOldestStackName(ArrayList<StackSummary> filteredStackSummries) {
-        Date date = filteredStackSummries.get(0).getCreationTime();
-        String stackToDelete = "";
-        for (StackSummary summary : filteredStackSummries) {
-            if (summary.getCreationTime().before(date));
-            {
-                date = summary.getCreationTime();
-                stackToDelete = summary.getStackName();
+    private String returnOldestStackName(ArrayList<StackSummary> filteredStackSummaries) {
+        StackSummary stackToDelete = filteredStackSummaries.get(0);
+        Date date = stackToDelete.getCreationTime();
+
+        for (StackSummary summary : filteredStackSummaries) {
+            if (summary.getCreationTime().before(date)) {
+                stackToDelete = summary;
+                date = stackToDelete.getCreationTime();
             }
         }
-        
-        return stackToDelete;
+
+        return stackToDelete.getStackName();
     }
 
     private List<StackSummary> getAllRunningStacks() {
@@ -508,14 +550,31 @@ public class CloudFormation {
                 return awsSecretKey;
             }
         });
+        client.setEndpoint(awsRegion.endPoint);
+
         List<String> stackStatusFilters = new ArrayList<String>();
         stackStatusFilters.add("UPDATE_COMPLETE");
         stackStatusFilters.add("CREATE_COMPLETE");
         stackStatusFilters.add("ROLLBACK_COMPLETE");
-        ListStacksRequest listStacksRequest = new ListStacksRequest();
-        listStacksRequest.setStackStatusFilters(stackStatusFilters);
-        ListStacksResult result = client.listStacks(listStacksRequest);
-        List<StackSummary> stackSummaries = result.getStackSummaries();
+
+        ListStacksRequest request = new ListStacksRequest();
+        request.setStackStatusFilters(stackStatusFilters);
+
+        ListStacksResult result = null;
+
+        List<StackSummary> stackSummaries = new ArrayList<StackSummary>();
+
+        do {
+            if (result != null) request.setNextToken(result.getNextToken());
+            result = client.listStacks(request);
+
+            for (StackSummary stack : result.getStackSummaries()) {
+                if (stack.getStackStatus().equalsIgnoreCase(StackStatus.DELETE_COMPLETE.toString())) continue;
+                if (stack.getStackStatus().equalsIgnoreCase(StackStatus.DELETE_IN_PROGRESS.toString())) continue;
+                stackSummaries.add(stack);
+            }
+        } while (result.getNextToken() != null);
+
         return stackSummaries;
     }
 

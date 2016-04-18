@@ -12,6 +12,9 @@
         <f:entry title="prefix" field="isPrefixSelected">
             <f:checkbox/>
         </f:entry>
+        <f:entry title="Retain Qty" field="retainStacksQty">
+            <f:textbox />
+        </f:entry>
         <f:entry title="AWS Access Key" field="awsAccessKey">
             <f:textbox />
         </f:entry>
