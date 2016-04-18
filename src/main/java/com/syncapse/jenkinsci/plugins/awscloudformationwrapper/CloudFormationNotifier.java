@@ -63,27 +63,38 @@ public class CloudFormationNotifier extends Notifier {
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		EnvVars envVars = build.getEnvironment(listener);
 		boolean result = true;
+        boolean failCascade = false;
+
 		for (SimpleStackBean stack : stacks) {
-			CloudFormation cloudFormation = new CloudFormation(
-					listener.getLogger(),
-					stack.getStackName(),
-					false,
-					"",
-					new HashMap<String, String>(),
-					0,
-					stack.getParsedAwsAccessKey(envVars),
-					stack.getParsedAwsSecretKey(envVars),
-					stack.getAwsRegion(),
-					false,
-					envVars,
-                                stack.getIsPrefixSelected()
-			);
-			if(cloudFormation.delete()) {
-				LOGGER.info("Success");
-			} else {
-				LOGGER.warning("Failed");
-				result = false;
-			}
+            if (!result && failCascade) {
+                listener.getLogger().println("Unable to build stack '" + envVars.expand(stack.getStackName()) + "' due to previous failed stacks");
+                continue;
+            }
+
+            CloudFormation cloudFormation = new CloudFormation(
+                    listener.getLogger(),
+                    stack.getStackName(),
+                    false,
+                    "",
+                    new HashMap<String, String>(),
+                    0,
+                    stack.getParsedAwsAccessKey(envVars),
+                    stack.getParsedAwsSecretKey(envVars),
+                    stack.getAwsRegion(),
+                    false,
+                    envVars,
+                    stack.getIsPrefixSelected()
+            );
+            if (cloudFormation.delete()) {
+                LOGGER.info("Success");
+            } else {
+                LOGGER.warning("Failed");
+                if (stack.getFailCascade()) {
+                    failCascade = true;
+                }
+                result = false;
+            }
+
 		}
 		return result;
 	}

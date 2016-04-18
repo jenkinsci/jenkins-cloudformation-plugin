@@ -71,26 +71,23 @@ public class CloudFormationBuildStep extends Builder{
 		EnvVars envVars = build.getEnvironment(listener);
                 envVars.overrideAll(build.getBuildVariables());
 		boolean result = true;
-                  
-                 
+		boolean failCascade = false;
+
 		for (PostBuildStackBean stack : stacks) {
-		final CloudFormation cloudFormation = newCloudFormation(stack,build, envVars, listener.getLogger());	
-                    /*CloudFormation cloudFormation = new CloudFormation(
-					listener.getLogger(),
-					stack.getStackName(),
-					"",
-					new HashMap<String, String>(),
-					0,
-					stack.getParsedAwsAccessKey(envVars),
-					stack.getParsedAwsSecretKey(envVars),
-					stack.getAwsRegion(),
-					false,
-					envVars
-			);*/
+
+			if (!result && failCascade) {
+				listener.getLogger().println("Unable to build stack '" + envVars.expand(stack.getStackName()) + "' due to previous failed stacks");
+				continue;
+			}
+			final CloudFormation cloudFormation = newCloudFormation(stack,build, envVars, listener.getLogger());
+
 			if(cloudFormation.create()) {
 				LOGGER.info("Success");
 			} else {
 				LOGGER.warning("Failed");
+				if (stack.getFailCascade()) {
+					failCascade = true;
+				}
 				result = false;
 			}
 		}

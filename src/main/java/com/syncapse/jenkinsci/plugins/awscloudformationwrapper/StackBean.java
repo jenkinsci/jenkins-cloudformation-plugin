@@ -63,13 +63,18 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
      * Whether or not the stack should be deleted automatically when the job completes
      */
     private boolean autoDeleteStack = true;
+
+	/**
+	 * if previous stacks fail cascade to prevent other stacks building
+	 */
+	private boolean failCascade = false;
     
     private Region awsRegion;
 	
 	@DataBoundConstructor
 	public StackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack, Region awsRegion) {
+			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack, Region awsRegion, boolean failCascade) {
 		super();
 		this.stackName = stackName;
 		this.description = description;
@@ -80,6 +85,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		this.awsSecretKey = awsSecretKey;
         this.autoDeleteStack = autoDeleteStack;
         this.awsRegion = awsRegion;
+		this.failCascade = failCascade;
 	}
 
 	public String getStackName() {
@@ -113,6 +119,10 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
     public boolean getAutoDeleteStack() {
         return autoDeleteStack;
     }
+
+	public boolean getFailCascade() {
+		return failCascade;
+	}
     
     public Region getAwsRegion(){
     	return awsRegion;

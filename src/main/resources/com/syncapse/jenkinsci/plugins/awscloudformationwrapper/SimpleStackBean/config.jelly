@@ -8,7 +8,6 @@
         <f:entry title="Stack name" field="stackName">
             <f:textbox />
         </f:entry>
-
         <f:entry title="prefix" field="isPrefixSelected">
             <f:checkbox/>
         </f:entry>
@@ -18,7 +17,9 @@
         <f:entry title="AWS Secret Key" field="awsSecretKey">
             <f:password />
         </f:entry>
-
+<       f:entry title="Prevent subsequent stacks executing on failure" field="failCascade"  >
+            <f:checkbox default="false"  />
+        </f:entry>
         <f:entry>
             <f:repeatableDeleteButton />
         </f:entry>

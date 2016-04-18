@@ -60,15 +60,19 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 	private String awsSecretKey;
 
         
-        private long sleep;
+    private long sleep;
 
+    /**
+     * if previous stacks fail cascade to prevent other stacks building
+     */
+    private boolean failCascade = false;
     
     private Region awsRegion;
 	
 	@DataBoundConstructor
 	public PostBuildStackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, Region awsRegion,long sleep) {
+			String awsAccessKey, String awsSecretKey, Region awsRegion,long sleep, boolean failCascade) {
 		super();
 		this.stackName = stackName;
 		this.description = description;
@@ -77,8 +81,9 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 		this.timeout = timeout;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
-                this.sleep=sleep;
+        this.sleep=sleep;
         this.awsRegion = awsRegion;
+        this.failCascade = failCascade;
 	}
 
 	public String getStackName() {
@@ -108,11 +113,15 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 	public String getAwsSecretKey() {
 		return awsSecretKey;
 	}
-        public long getSleep() {
+
+    public long getSleep() {
 		return sleep;
 	}
 
-    
+	public boolean getFailCascade() {
+		return failCascade;
+	}
+
     public Region getAwsRegion(){
     	return awsRegion;
     }

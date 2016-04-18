@@ -53,10 +53,16 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
         EnvVars env = build.getEnvironment(listener);
         env.overrideAll(build.getBuildVariables());
-        
+
         boolean success = true;
-        
+        boolean failCascade = false;
+
 		for (StackBean stackBean : stacks) {
+
+			if (!success && failCascade) {
+				listener.getLogger().println("Unable to build stack '" + env.expand(stackBean.getStackName()) + "' due to previous failed stacks");
+				continue;
+			}
 
 			final CloudFormation cloudFormation = newCloudFormation(stackBean,
 					build, env, listener.getLogger());
@@ -67,6 +73,9 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 					env.putAll(cloudFormation.getOutputs());
 				} else {
 					build.setResult(Result.FAILURE);
+					if (stackBean.getFailCascade()) {
+						failCascade = true;
+					}
 					success = false;
 					break;
 				}

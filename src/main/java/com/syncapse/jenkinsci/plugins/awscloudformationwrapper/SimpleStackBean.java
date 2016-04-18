@@ -43,20 +43,23 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 	 */
 	private Region awsRegion;
         
-        private Boolean isPrefixSelected;
-        
+    private Boolean isPrefixSelected;
+
+    /**
+     * if previous stacks fail cascade to prevent other stacks building
+     */
+    private boolean failCascade = false;
        
  
 	@DataBoundConstructor
 	public SimpleStackBean(String stackName, String awsAccessKey,
-			String awsSecretKey, Region awsRegion,Boolean isPrefixSelected) {
+			String awsSecretKey, Region awsRegion,Boolean isPrefixSelected, boolean failCascade) {
 		this.stackName = stackName;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
 		this.awsRegion = awsRegion != null ? awsRegion : Region.getDefault();
-                this.isPrefixSelected=isPrefixSelected;
-                
-          
+        this.isPrefixSelected=isPrefixSelected;
+        this.failCascade = failCascade;
 	}
 
 	public String getStackName() {
@@ -86,6 +89,9 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 		return awsRegion;
 	}
 
+    public boolean getFailCascade() {
+        return failCascade;
+    }
 
 	@Extension
 	public static final class DescriptorImpl extends
