@@ -216,15 +216,25 @@ public class CloudFormation {
 
 
             stack = waitForStackToBeCreated();
-
-            StackStatus status = getStackStatus(stack.getStackStatus());
+            int count = 0;
+            int maxTries = 3;
+            StackStatus status;
+            //while(true) {
+            //    try {
+                    status = getStackStatus(stack.getStackStatus());
+            //        break;
+            //    } catch (AmazonClientException e) {
+            //        logger.println("Got an error getting stack status, retrying "+count+" out of "+maxTries+" times");
+            //        if (++count == maxTries) throw e;
+            //    }
+            //}
 
             Map<String, String> stackOutput = new HashMap<String, String>();
             if (isStackCreationSuccessful(status)) {
                 List<Output> outputs = stack.getOutputs();
-                //for (Output output : outputs) {
-                //    stackOutput.put(output.getOutputKey(), output.getOutputValue());
-                //}
+                for (Output output : outputs) {
+                    stackOutput.put(output.getOutputKey(), output.getOutputValue());
+                }
 
                 logger.println("Successfully created stack: " + getExpandedStackName());
                 this.outputs = stackOutput;
@@ -373,7 +383,18 @@ public class CloudFormation {
     private void printStackEvents() {
         DescribeStackEventsRequest r = new DescribeStackEventsRequest();
         r.withStackName(getExpandedStackName());
-        DescribeStackEventsResult describeStackEvents = amazonClient.describeStackEvents(r);
+        int count = 0;
+        int maxTries = 3;
+        DescribeStackEventsResult describeStackEvents;
+        while(true) {
+            try {
+                describeStackEvents = amazonClient.describeStackEvents(r);
+                break;
+            } catch (AmazonClientException e) {
+                logger.println("Got an error getting stack status, retrying "+count+" out of "+maxTries+" times");
+                if (++count == maxTries) throw e;
+            }
+        }
 
         List<StackEvent> stackEvents = describeStackEvents.getStackEvents();
         Collections.reverse(stackEvents);
