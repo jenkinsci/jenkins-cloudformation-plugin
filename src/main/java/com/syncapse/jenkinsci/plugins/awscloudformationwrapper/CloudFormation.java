@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.http.conn.ssl.*;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -219,15 +218,7 @@ public class CloudFormation {
             int count = 0;
             int maxTries = 3;
             StackStatus status;
-            //while(true) {
-            //    try {
-                    status = getStackStatus(stack.getStackStatus());
-            //        break;
-            //    } catch (AmazonClientException e) {
-            //        logger.println("Got an error getting stack status, retrying "+count+" out of "+maxTries+" times");
-            //        if (++count == maxTries) throw e;
-            //    }
-            //}
+            status = getStackStatus(stack.getStackStatus());
 
             Map<String, String> stackOutput = new HashMap<String, String>();
             if (isStackCreationSuccessful(status)) {
