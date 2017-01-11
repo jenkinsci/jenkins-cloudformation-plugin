@@ -374,8 +374,8 @@ public class CloudFormation {
     private void printStackEvents() {
         DescribeStackEventsRequest r = new DescribeStackEventsRequest();
         r.withStackName(getExpandedStackName());
-        int count = 0;
-        int maxTries = 3;
+        int count = 1;
+        int maxTries = 4;
         DescribeStackEventsResult describeStackEvents;
         while(true) {
             try {
