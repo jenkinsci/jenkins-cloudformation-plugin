@@ -223,6 +223,7 @@ public class CloudFormation {
                 List<Output> outputs = stack.getOutputs();
                 for (Output output : outputs) {
                     stackOutput.put(output.getOutputKey(), output.getOutputValue());
+                    logger.format("Outputs: %s : %s \n", output.getOutputKey(), output.getOutputValue());
                 }
 
                 logger.println("Successfully created stack: " + getExpandedStackName());
