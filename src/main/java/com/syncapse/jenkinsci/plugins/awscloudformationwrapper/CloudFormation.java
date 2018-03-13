@@ -75,6 +75,7 @@ public class CloudFormation {
     private Boolean isTagFilterOn;
     private Map<String, String> outputs;
     private long sleep=0;
+    private Capability capability;
 
     /**
      * @param logger a logger to write progress information.
@@ -93,7 +94,7 @@ public class CloudFormation {
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
-            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected) {
+            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected,Capability capability) {
 
         this.logger = logger;
         this.stackName = stackName;
@@ -104,21 +105,22 @@ public class CloudFormation {
         this.awsSecretKey = awsSecretKey;
         this.awsRegion = region != null ? region : Region.getDefault();
         this.isPrefixSelected = isPrefixSelected;
-        
+
         if (timeout == -12345) {
             this.timeout = 0; // Faster testing.
         } else {
             this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
         }
+
         this.amazonClient = getAWSClient();
         this.autoDeleteStack = autoDeleteStack;
         this.envVars = envVars;
-    
+        this.capability = capability;
     }
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
-            EnvVars envVars, Boolean isPrefixSelected,long sleep) {
+            EnvVars envVars, Boolean isPrefixSelected,long sleep,Capability capability) {
 
         this.logger = logger;
         this.stackName = stackName;
@@ -129,23 +131,25 @@ public class CloudFormation {
         this.awsSecretKey = awsSecretKey;
         this.awsRegion = region != null ? region : Region.getDefault();
         this.isPrefixSelected = isPrefixSelected;
+
         if (timeout == -12345) {
             this.timeout = 0; // Faster testing.
         } else {
             this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
         }
+
         this.amazonClient = getAWSClient();
         this.autoDeleteStack = false;
         this.envVars = envVars;
         this.sleep=sleep;
-    
+        this.capability = capability;
     }
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters, long timeout,
             String awsAccessKey, String awsSecretKey, boolean autoDeleteStack,
-            EnvVars envVars, Boolean isPrefixSelected) {
+            EnvVars envVars, Boolean isPrefixSelected,Capability capability) {
         this(logger, stackName, isRecipeURL, recipeBody, parameters, timeout, awsAccessKey,
-                awsSecretKey, null, autoDeleteStack, envVars, isPrefixSelected);
+                awsSecretKey, null, autoDeleteStack, envVars, isPrefixSelected,capability);
     }
 
     /**
@@ -440,7 +444,7 @@ public class CloudFormation {
         } else {
             r.withTemplateBody(recipe);
         }
-        r.withCapabilities("CAPABILITY_IAM");
+        r.withCapabilities(this.capability.name);
 
         return r;
     }
@@ -450,7 +454,7 @@ public class CloudFormation {
         r.withStackName(getExpandedStackName());
         r.withParameters(parameters);
         r.withTemplateBody(recipe);
-        r.withCapabilities("CAPABILITY_IAM");
+        r.withCapabilities(this.capability.name);
 
         return r;
 	}

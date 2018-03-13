@@ -113,7 +113,7 @@ public class CloudFormationBuildStep extends Builder{
 				recipe, postBuildStackBean.getParsedParameters(env),
 				postBuildStackBean.getTimeout(), postBuildStackBean.getParsedAwsAccessKey(env),
 				postBuildStackBean.getParsedAwsSecretKey(env),
-				postBuildStackBean.getAwsRegion(), env,false,postBuildStackBean.getSleep());
+				postBuildStackBean.getAwsRegion(), env,false,postBuildStackBean.getSleep(),postBuildStackBean.getCapability());
 
 	}
 	@Override

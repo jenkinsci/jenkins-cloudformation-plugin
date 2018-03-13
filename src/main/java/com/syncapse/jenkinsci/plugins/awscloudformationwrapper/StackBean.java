@@ -65,11 +65,13 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
     private boolean autoDeleteStack = true;
     
     private Region awsRegion;
+
+	private Capability capability;
 	
 	@DataBoundConstructor
 	public StackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack, Region awsRegion) {
+			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack, Region awsRegion,Capability capability) {
 		super();
 		this.stackName = stackName;
 		this.description = description;
@@ -80,6 +82,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		this.awsSecretKey = awsSecretKey;
         this.autoDeleteStack = autoDeleteStack;
         this.awsRegion = awsRegion;
+        this.capability = capability;
 	}
 
 	public String getStackName() {
@@ -117,6 +120,10 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
     public Region getAwsRegion(){
     	return awsRegion;
     }
+
+	public Capability getCapability(){
+		return capability;
+	}
 
 	public Map<String, String> getParsedParameters(EnvVars env) {
 		
@@ -215,7 +222,13 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 			}
             return items;
         }
-
+		public ListBoxModel doFillCapabilityItems() {
+			ListBoxModel items = new ListBoxModel();
+			for (Capability capability : Capability.values()) {
+				items.add(capability.readableName, capability.name());
+			}
+			return items;
+		}
 	}
 
 
