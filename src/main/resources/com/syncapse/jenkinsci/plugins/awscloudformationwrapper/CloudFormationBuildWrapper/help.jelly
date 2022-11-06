@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <div>
 Creates <a href="http://aws.amazon.com/cloudformation/">AWS CloudFormation</a> stacks before the build and deletes them after the build.<br/>
 The outputs of the cloudformation are exported as environment variables.

@@ -1,8 +1,9 @@
 <!--
   This view is used to render the plugin list page.
 
-  Since we don't really have anything dynamic here, let's just use static HTML. 
+  Since we don't really have anything dynamic here, let's just use static HTML.
 -->
+<?jelly escape-by-default='true'?>
 <div>
   Adds a build wrapper that can spawn an AWS Cloud Formation recipe at the start of the build and take it down at the end.
 </div>
