@@ -96,13 +96,6 @@
 		          <version>2.3.2</version>
 		      </plugin>
               <plugin>
-                  <groupId>org.jenkins-ci.tools</groupId>
-                  <artifactId>maven-hpi-plugin</artifactId>
-                  <configuration>
-                      <disabledTestInjection>true</disabledTestInjection>
-                  </configuration>
-              </plugin>
-              <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-javadoc-plugin</artifactId>
                   <configuration>
