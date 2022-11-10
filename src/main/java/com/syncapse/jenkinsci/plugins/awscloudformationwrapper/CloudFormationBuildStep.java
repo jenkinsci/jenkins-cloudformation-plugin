@@ -5,6 +5,7 @@
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
 import static com.syncapse.jenkinsci.plugins.awscloudformationwrapper.CloudFormationPostBuildNotifier.DESCRIPTOR;
+import com.amazonaws.services.cloudformation.model.Parameter;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -20,8 +21,10 @@ import hudson.tasks.Publisher;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -109,8 +112,21 @@ public class CloudFormationBuildStep extends Builder{
 			recipe = build.getWorkspace().child(postBuildStackBean.getCloudFormationRecipe()).readToString();
 		}
 
+		List<Parameter> mergedParameters = Collections.emptyList();
+		Map<String, String> parsedParameters = postBuildStackBean.getParsedParameters(env);
+		if (parsedParameters != null) {
+			mergedParameters = ParameterUtils.convert(parsedParameters);
+		}
+
+		if (postBuildStackBean.getParametersFile() != null && !postBuildStackBean.getParametersFile().isEmpty()) {
+			String parametersJsonString = build.getWorkspace().child(postBuildStackBean.getParametersFile()).readToString();
+			List<Parameter> fileParameters = ParameterUtils.parse(parametersJsonString);
+
+			mergedParameters = ParameterUtils.merge(mergedParameters, fileParameters);
+		}
+
 		return new CloudFormation(logger, postBuildStackBean.getStackName(), isURL,
-				recipe, postBuildStackBean.getParsedParameters(env),
+				recipe, mergedParameters,
 				postBuildStackBean.getTimeout(), postBuildStackBean.getParsedAwsAccessKey(env),
 				postBuildStackBean.getParsedAwsSecretKey(env),
 				postBuildStackBean.getAwsRegion(), env,false,postBuildStackBean.getSleep());

@@ -64,11 +64,16 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 
     
     private Region awsRegion;
+
+	/**
+	 * The file containing parameters to be passed into the cloud formation.
+	 */
+	private String parametersFile;
 	
 	@DataBoundConstructor
 	public PostBuildStackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, Region awsRegion,long sleep) {
+			String awsAccessKey, String awsSecretKey, Region awsRegion,long sleep, String parametersFile) {
 		super();
 		this.stackName = stackName;
 		this.description = description;
@@ -77,8 +82,9 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 		this.timeout = timeout;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
-                this.sleep=sleep;
-        this.awsRegion = awsRegion;
+		this.sleep=sleep;
+		this.awsRegion = awsRegion;
+		this.parametersFile = parametersFile;
 	}
 
 	public String getStackName() {
@@ -140,7 +146,15 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 		}
 		return result;
 	}
-	
+
+	public String getParametersFile() {
+		return parametersFile;
+	}
+
+	public void setParametersFile(String parametersFile) {
+		this.parametersFile = parametersFile;
+	}
+
 	public String getParsedAwsAccessKey(EnvVars env) {
 		return env.expand(getAwsAccessKey());
 	}
