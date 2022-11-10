@@ -118,7 +118,7 @@ public class CloudFormation {
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
-            EnvVars envVars, Boolean isPrefixSelected,long sleep) {
+            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected,long sleep) {
 
         this.logger = logger;
         this.stackName = stackName;
@@ -135,7 +135,7 @@ public class CloudFormation {
             this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
         }
         this.amazonClient = getAWSClient();
-        this.autoDeleteStack = false;
+        this.autoDeleteStack = autoDeleteStack;
         this.envVars = envVars;
         this.sleep=sleep;
     

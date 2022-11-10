@@ -17,12 +17,15 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Builder;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collection;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -66,11 +69,13 @@ public class CloudFormationBuildStep extends Builder{
 		return super.getProjectActions(project);
 	}
   
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		EnvVars envVars = build.getEnvironment(listener);
                 envVars.overrideAll(build.getBuildVariables());
 		boolean result = true;
+		PrintStream logger = listener.getLogger();
                   
                  
 		for (PostBuildStackBean stack : stacks) {
@@ -88,6 +93,16 @@ public class CloudFormationBuildStep extends Builder{
 					envVars
 			);*/
 			if(cloudFormation.create()) {
+				// Adding outputs to our injection action
+				Map<String,String> outputs = cloudFormation.getOutputs();
+				for (Map.Entry<String,String> output : outputs.entrySet()) {
+					logger.println("New Environment Variable: " + output.getKey() + "=" + output.getValue());
+					VariableInjectionAction action = new VariableInjectionAction(output.getKey(), output.getValue());
+					build.addAction(action);
+				}
+				 
+				// Rebuild environment
+				build.getEnvironment();
 				LOGGER.info("Success");
 			} else {
 				LOGGER.warning("Failed");
@@ -113,7 +128,7 @@ public class CloudFormationBuildStep extends Builder{
 				recipe, postBuildStackBean.getParsedParameters(env),
 				postBuildStackBean.getTimeout(), postBuildStackBean.getParsedAwsAccessKey(env),
 				postBuildStackBean.getParsedAwsSecretKey(env),
-				postBuildStackBean.getAwsRegion(), env,false,postBuildStackBean.getSleep());
+				postBuildStackBean.getAwsRegion(), false, env,false,postBuildStackBean.getSleep());
 
 	}
 	@Override
