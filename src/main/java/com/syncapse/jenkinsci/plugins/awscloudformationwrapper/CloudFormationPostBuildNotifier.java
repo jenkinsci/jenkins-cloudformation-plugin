@@ -70,22 +70,10 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 		EnvVars envVars = build.getEnvironment(listener);
                 envVars.overrideAll(build.getBuildVariables());
 		boolean result = true;
-                  
-                 
+		PrintStream logger = listener.getLogger();
+
 		for (PostBuildStackBean stack : stacks) {
 		final CloudFormation cloudFormation = newCloudFormation(stack,build, envVars, listener.getLogger());	
-                    /*CloudFormation cloudFormation = new CloudFormation(
-					listener.getLogger(),
-					stack.getStackName(),
-					"",
-					new HashMap<String, String>(),
-					0,
-					stack.getParsedAwsAccessKey(envVars),
-					stack.getParsedAwsSecretKey(envVars),
-					stack.getAwsRegion(),
-					false,
-					envVars
-			);*/
 			if(cloudFormation.create()) {
 				LOGGER.info("Success");
 			} else {
@@ -112,7 +100,7 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 				recipe, postBuildStackBean.getParsedParameters(env),
 				postBuildStackBean.getTimeout(), postBuildStackBean.getParsedAwsAccessKey(env),
 				postBuildStackBean.getParsedAwsSecretKey(env),
-				postBuildStackBean.getAwsRegion(), env,false,postBuildStackBean.getSleep());
+				postBuildStackBean.getAwsRegion(), false, env,false,postBuildStackBean.getSleep());
 
 	}
 	@Override

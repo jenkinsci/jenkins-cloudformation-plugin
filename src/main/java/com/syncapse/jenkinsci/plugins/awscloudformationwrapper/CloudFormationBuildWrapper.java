@@ -55,6 +55,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
         env.overrideAll(build.getBuildVariables());
         
         boolean success = true;
+        PrintStream logger = listener.getLogger();
         
 		for (StackBean stackBean : stacks) {
 
@@ -64,6 +65,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 			try {
 				if (cloudFormation.create()) {
 					cloudFormations.add(cloudFormation);
+					logger.println("Adding environment variables to Jenkins in BuildWrapper.");
 					env.putAll(cloudFormation.getOutputs());
 				} else {
 					build.setResult(Result.FAILURE);

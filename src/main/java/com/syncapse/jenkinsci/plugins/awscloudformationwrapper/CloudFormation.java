@@ -118,7 +118,7 @@ public class CloudFormation {
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
             long timeout, String awsAccessKey, String awsSecretKey, Region region,
-            EnvVars envVars, Boolean isPrefixSelected,long sleep) {
+            boolean autoDeleteStack, EnvVars envVars, Boolean isPrefixSelected,long sleep) {
 
         this.logger = logger;
         this.stackName = stackName;
@@ -135,7 +135,7 @@ public class CloudFormation {
             this.timeout = timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
         }
         this.amazonClient = getAWSClient();
-        this.autoDeleteStack = false;
+        this.autoDeleteStack = autoDeleteStack;
         this.envVars = envVars;
         this.sleep=sleep;
     
@@ -456,10 +456,19 @@ public class CloudFormation {
 	}
 	
     public Map<String, String> getOutputs() {
-        // Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
+        // Prefix outputs with stack name to prevent collisions with other
+        // stacks created in the same build.
+        // We also define the outputs without stack prefix so that we can easily
+        // have dynamic stack names.
         HashMap<String, String> map = new HashMap<String, String>();
         for (String key : outputs.keySet()) {
-            map.put(getExpandedStackName() + "_" + key, outputs.get(key));
+            // Make our output environment friendly
+            // Replace - with _ and set all to uppercase.
+            String envFriendlyKey = key.replaceAll("-", "_").toUpperCase();
+            String envFriendlyStackName = getExpandedStackName().replaceAll("-", "_").toUpperCase();
+            // Add them to our map
+            map.put(envFriendlyStackName + "_" + envFriendlyKey, outputs.get(key));
+            map.put(envFriendlyKey, outputs.get(key));
         }
         return map;
     }
