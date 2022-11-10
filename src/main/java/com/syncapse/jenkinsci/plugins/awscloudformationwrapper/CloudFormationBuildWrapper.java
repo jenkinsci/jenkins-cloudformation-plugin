@@ -12,11 +12,10 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
-
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +29,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
 	protected List<StackBean> stacks;
 
-	private transient List<CloudFormation> cloudFormations = new ArrayList<CloudFormation>();
+	private transient Map<Integer, CloudFormation> cloudFormationsMap = new HashMap<Integer, CloudFormation>();
 
 	@DataBoundConstructor
 	public CloudFormationBuildWrapper(List<StackBean> stacks) {
@@ -40,9 +39,8 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	@Override
 	public void makeBuildVariables(AbstractBuild build,
 			Map<String, String> variables) {
-
-		for (CloudFormation cf : cloudFormations) {
-			variables.putAll(cf.getOutputs());
+			if(build != null && cloudFormationsMap.get(build.number) != null){
+			variables.putAll(cloudFormationsMap.get(build.number).getOutputs());
 		}
 
 	}
@@ -50,12 +48,10 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	@Override
 	public Environment setUp(AbstractBuild build, Launcher launcher,
 			BuildListener listener) throws IOException, InterruptedException {
-
         EnvVars env = build.getEnvironment(listener);
         env.overrideAll(build.getBuildVariables());
-        
         boolean success = true;
-        
+
 		for (StackBean stackBean : stacks) {
 
 			final CloudFormation cloudFormation = newCloudFormation(stackBean,
@@ -63,7 +59,8 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 
 			try {
 				if (cloudFormation.create()) {
-					cloudFormations.add(cloudFormation);
+					//This is dirty fix for now as if we have more than one stackbean, it'll be overwritten
+					cloudFormationsMap.put(build.number, cloudFormation);
 					env.putAll(cloudFormation.getOutputs());
 				} else {
 					build.setResult(Result.FAILURE);
@@ -84,7 +81,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 		
 		// If any stack fails to create then destroy them all
 		if (!success) {
-			doTearDown();
+			doTearDown(build);
 			return null;
 		}
 
@@ -93,27 +90,19 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 			public boolean tearDown(AbstractBuild build, BuildListener listener)
 					throws IOException, InterruptedException {
 
-				return doTearDown();
+				return doTearDown(build);
 				
 			}
 
 		};
 	}
 	
-	protected boolean doTearDown() throws IOException, InterruptedException{
+	protected boolean doTearDown(AbstractBuild build) throws IOException, InterruptedException{
 		boolean result = true;
-
-		List<CloudFormation> reverseOrder = new ArrayList<CloudFormation>(cloudFormations);
-		Collections.reverse(reverseOrder);
-
-		for (CloudFormation cf : reverseOrder) {
-            // automatically delete the stack?
-            if (cf.getAutoDeleteStack()) {
-                // delete the stack
-                result = result && cf.delete();
-            }
+		CloudFormation cf = cloudFormationsMap.get(build.number);
+		if(cf.getAutoDeleteStack()) {
+			result = result && cf.delete();
 		}
-
 		return result;
 	}
 
@@ -163,7 +152,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 	 */
 	private Object readResolve() {
 		// Initialize the cloud formation collection during deserialization to avoid NPEs. 
-		cloudFormations = new ArrayList<CloudFormation>();
+		cloudFormationsMap = new HashMap<Integer, CloudFormation>();
 		return this;
 	}
 	
