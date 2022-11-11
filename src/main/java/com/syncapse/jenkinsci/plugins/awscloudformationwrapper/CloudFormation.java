@@ -72,7 +72,6 @@ public class CloudFormation {
     private EnvVars envVars;
     private Region awsRegion;
     private Boolean isPrefixSelected;
-    private Boolean isTagFilterOn;
     private Map<String, String> outputs;
     private long sleep=0;
 
@@ -319,11 +318,10 @@ public class CloudFormation {
         }
 
         List<Parameter> result = Lists.newArrayList();
-        Parameter parameter = null;
-        for (String name : parameters.keySet()) {
-            parameter = new Parameter();
-            parameter.setParameterKey(name);
-            parameter.setParameterValue(parameters.get(name));
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            Parameter parameter = new Parameter();
+            parameter.setParameterKey(entry.getKey());
+            parameter.setParameterValue(entry.getValue());
             result.add(parameter);
         }
 
@@ -458,8 +456,8 @@ public class CloudFormation {
     public Map<String, String> getOutputs() {
         // Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
         HashMap<String, String> map = new HashMap<String, String>();
-        for (String key : outputs.keySet()) {
-            map.put(getExpandedStackName() + "_" + key, outputs.get(key));
+        for (Map.Entry<String, String> entry : outputs.entrySet()) {
+            map.put(getExpandedStackName() + "_" + entry.getKey(), entry.getValue());
         }
         return map;
     }
@@ -471,7 +469,6 @@ public class CloudFormation {
     private String getOldestStackNameWithPrefix() {
         List<StackSummary> stackSummaries = getAllRunningStacks();
         ArrayList<StackSummary> filteredStackSummries = new ArrayList<StackSummary>();
-        List<String> stackNames = new ArrayList<String>();
         for (StackSummary summary : stackSummaries) {
             if (summary.getStackName().startsWith(stackName)) {
                 filteredStackSummries.add(summary);
@@ -488,8 +485,7 @@ public class CloudFormation {
         Date date = filteredStackSummries.get(0).getCreationTime();
         String stackToDelete = "";
         for (StackSummary summary : filteredStackSummries) {
-            if (summary.getCreationTime().before(date));
-            {
+            if (summary.getCreationTime().before(date)) {
                 date = summary.getCreationTime();
                 stackToDelete = summary.getStackName();
             }

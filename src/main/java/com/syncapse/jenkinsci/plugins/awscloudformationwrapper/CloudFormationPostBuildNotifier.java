@@ -100,12 +100,14 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 			throws IOException, InterruptedException {
 
 		Boolean isURL = false;
-		String recipe = null;
+		String recipe;
 		if(CloudFormation.isRecipeURL(postBuildStackBean.getCloudFormationRecipe())) {
 			isURL = true;
 			recipe = postBuildStackBean.getCloudFormationRecipe();
-		} else {
+		} else if (build.getWorkspace() != null) {
 			recipe = build.getWorkspace().child(postBuildStackBean.getCloudFormationRecipe()).readToString();
+		} else {
+			throw new InterruptedException("Failed to load recipe");
 		}
 
 		return new CloudFormation(logger, postBuildStackBean.getStackName(), isURL,

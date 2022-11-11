@@ -122,13 +122,15 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 			throws IOException, InterruptedException {
 
 		Boolean isURL = false;
-		String recipe = null;
+		String recipe;
 
 		if(CloudFormation.isRecipeURL(stackBean.getCloudFormationRecipe())) {
 			isURL = true;
 			recipe = stackBean.getCloudFormationRecipe();
-		} else {
+		} else if (build.getWorkspace() != null) {
 			recipe = build.getWorkspace().child(stackBean.getCloudFormationRecipe()).readToString();
+		} else {
+			throw new InterruptedException("Failed to load recipe");
 		}
 
 		return new CloudFormation(logger, stackBean.getStackName(), isURL,
