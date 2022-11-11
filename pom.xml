@@ -13,8 +13,8 @@
 
 	<artifactId>jenkins-cloudformation-plugin</artifactId>
 	<version>1.4-SNAPSHOT</version>
-	
-	<url>https://wiki.jenkins-ci.org/display/JENKINS/AWS+Cloudformation+Plugin</url>
+
+	<url>https://github.com/jenkinsci/jenkins-cloudformation-plugin</url>
 
 	<licenses>
 		<license>
@@ -112,7 +112,7 @@
 		<url>https://github.com/jenkinsci/jenkins-cloudformation-plugin</url>
 	  <tag>HEAD</tag>
   </scm>
-	
+
 
     <repositories>
         <repository>
@@ -131,5 +131,5 @@
 	<properties>
 	   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-  
-</project>  
+
+</project>
