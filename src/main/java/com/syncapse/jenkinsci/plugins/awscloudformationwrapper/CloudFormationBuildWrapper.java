@@ -3,6 +3,7 @@
  */
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -117,6 +118,7 @@ public class CloudFormationBuildWrapper extends BuildWrapper {
 		return result;
 	}
 
+	@SuppressFBWarnings(value="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 	protected CloudFormation newCloudFormation(StackBean stackBean,
 			AbstractBuild<?, ?> build, EnvVars env, PrintStream logger)
 			throws IOException, InterruptedException {

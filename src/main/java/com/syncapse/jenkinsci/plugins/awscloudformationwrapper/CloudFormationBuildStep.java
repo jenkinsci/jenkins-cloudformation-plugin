@@ -5,6 +5,8 @@
 package com.syncapse.jenkinsci.plugins.awscloudformationwrapper;
 
 import static com.syncapse.jenkinsci.plugins.awscloudformationwrapper.CloudFormationPostBuildNotifier.DESCRIPTOR;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -96,6 +98,7 @@ public class CloudFormationBuildStep extends Builder{
 		}
 		return result;
 	}
+	@SuppressFBWarnings(value="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 	protected CloudFormation newCloudFormation(PostBuildStackBean postBuildStackBean,
 			AbstractBuild<?, ?> build, EnvVars env, PrintStream logger)
 			throws IOException, InterruptedException {
