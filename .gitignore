@@ -5,6 +5,8 @@
 
 # Maven files
 target
+*.releaseBackup
+release.properties
 
 work
 
