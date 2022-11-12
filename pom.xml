@@ -73,6 +73,14 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-2.303.x</artifactId>
+                <!-- Latest version goes here -->
+                <version>1117.v62a_f6a_01de98</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>1.15</version>
@@ -118,6 +126,7 @@
         <gitHubRepo>jenkinsci/jenkins-cloudformation-plugin</gitHubRepo>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.level>8</java.level>
+        <jenkins.version>2.332.4</jenkins.version>
     </properties>
 
 </project>
