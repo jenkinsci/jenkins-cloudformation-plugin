@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import hudson.util.Secret;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -57,7 +58,7 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 	/**
 	 * The secret key to call Amazon's APIs
 	 */
-	private String awsSecretKey;
+	private Secret awsSecretKey;
 
         
         private long sleep;
@@ -68,7 +69,7 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 	@DataBoundConstructor
 	public PostBuildStackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, Region awsRegion,long sleep) {
+			String awsAccessKey, Secret awsSecretKey, Region awsRegion,long sleep) {
 		super();
 		this.stackName = stackName;
 		this.description = description;
@@ -105,7 +106,7 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 		return awsAccessKey;
 	}
 
-	public String getAwsSecretKey() {
+	public Secret getAwsSecretKey() {
 		return awsSecretKey;
 	}
         public long getSleep() {
@@ -147,7 +148,7 @@ public class PostBuildStackBean extends AbstractDescribableImpl<PostBuildStackBe
 
 	
 	public String getParsedAwsSecretKey(EnvVars env) {
-		return env.expand(getAwsSecretKey());
+		return env.expand(getAwsSecretKey().getPlainText());
 	}
 
 	@Extension
