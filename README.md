@@ -44,6 +44,15 @@ This makes your AWS credentials available as environmental variables.
 Now you can configure the CloudFormation plugin to use these env vars.
 ![](docs/images/env_vars.png)
 
+## Vulnerabilities
+### CVE-2019-1003061
+Link: [SECURITY-1042/CVE-2019-1003061](https://www.jenkins.io/security/advisory/2019-04-03/#SECURITY-1042)
+
+Previous versions of this plugin store AWS Secret Key in plain text. This issue is resolved in version 1.4 and later.
+
+You can still use previous version of this plugin and avoid storing your AWS Credentials in plain text by using
+Credentials Binding plugin and referencing the AWS Keys with env vars. See Using with Credentials Binding Plugin section above.
+
 ## Contributing
 
 To contribute to this project, please read the 
