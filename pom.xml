@@ -12,7 +12,7 @@
 	<packaging>hpi</packaging>
 
 	<artifactId>jenkins-cloudformation-plugin</artifactId>
-	<version>1.4-SNAPSHOT</version>
+	<version>${revision}${changelist}</version>
 
 	<url>https://github.com/jenkinsci/jenkins-cloudformation-plugin</url>
 
@@ -107,10 +107,10 @@
 	</build>
 
 	<scm>
-		<connection>scm:git:git@github.com:jenkinsci/jenkins-cloudformation-plugin.git</connection>
-		<developerConnection>scm:git:git@github.com:jenkinsci/jenkins-cloudformation-plugin.git</developerConnection>
-		<url>https://github.com/jenkinsci/jenkins-cloudformation-plugin</url>
-	  <tag>HEAD</tag>
+		<connection>scm:git:git@github.com:${gitHubRepo}.git</connection>
+		<developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+		<url>https://github.com/${gitHubRepo}</url>
+	  <tag>${scmTag}</tag>
   </scm>
 
 
@@ -129,6 +129,9 @@
     </pluginRepositories>
 
 	<properties>
+    <revision>1.4</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <gitHubRepo>jenkinsci/jenkins-cloudformation-plugin</gitHubRepo>
 	   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
