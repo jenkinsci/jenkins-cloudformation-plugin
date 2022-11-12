@@ -23,91 +23,92 @@ import java.util.logging.Logger;
  * Time: 12:45 PM
  */
 public class CloudFormationNotifier extends Notifier {
-	private static final Logger LOGGER = Logger.getLogger(CloudFormationNotifier.class.getName());
-	private final List<SimpleStackBean> stacks;
+    private static final Logger LOGGER = Logger.getLogger(CloudFormationNotifier.class.getName());
+    private final List<SimpleStackBean> stacks;
 
-	@DataBoundConstructor
-	public CloudFormationNotifier(List<SimpleStackBean> stacks) {
-		this.stacks = stacks;
-	}
+    @DataBoundConstructor
+    public CloudFormationNotifier(List<SimpleStackBean> stacks) {
+        this.stacks = stacks;
+    }
 
-	public List<SimpleStackBean> getStacks() {
-		return stacks;
-	}
+    public List<SimpleStackBean> getStacks() {
+        return stacks;
+    }
 
 
-	public BuildStepMonitor getRequiredMonitorService() {
-		return BuildStepMonitor.BUILD;
-	}
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.BUILD;
+    }
 
-	@Override
-	public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-		LOGGER.info("prebuild");
-		return super.prebuild(build, listener);
-	}
+    @Override
+    public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
+        LOGGER.info("prebuild");
+        return super.prebuild(build, listener);
+    }
 
-       
-	@Override
-	public Action getProjectAction(AbstractProject<?, ?> project) {
-		LOGGER.info("getProjectAction");
-		return super.getProjectAction(project);
-	}
 
-	@Override
-	public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
-		LOGGER.info("getProjectActions");
-		return super.getProjectActions(project);
-	}
-  
-	@Override
-	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-		EnvVars envVars = build.getEnvironment(listener);
-		boolean result = true;
-		for (SimpleStackBean stack : stacks) {
-			CloudFormation cloudFormation = new CloudFormation(
-					listener.getLogger(),
-					stack.getStackName(),
-					false,
-					"",
-					new HashMap<String, String>(),
-					0,
-					stack.getParsedAwsAccessKey(envVars),
-					stack.getParsedAwsSecretKey(envVars),
-					stack.getAwsRegion(),
-					false,
-					envVars,
-                                stack.getIsPrefixSelected()
-			);
-			if(cloudFormation.delete()) {
-				LOGGER.info("Success");
-			} else {
-				LOGGER.warning("Failed");
-				result = false;
-			}
-		}
-		return result;
-	}
+    @Override
+    public Action getProjectAction(AbstractProject<?, ?> project) {
+        LOGGER.info("getProjectAction");
+        return super.getProjectAction(project);
+    }
 
-	@Override
-	public BuildStepDescriptor getDescriptor() {
-		return DESCRIPTOR;
-	}
+    @Override
+    public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
+        LOGGER.info("getProjectActions");
+        return super.getProjectActions(project);
+    }
 
-	@Extension
-	public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
+    @Override
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+        EnvVars envVars = build.getEnvironment(listener);
+        boolean result = true;
+        for (SimpleStackBean stack : stacks) {
+            CloudFormation cloudFormation = new CloudFormation(
+                    listener.getLogger(),
+                    stack.getStackName(),
+                    false,
+                    "",
+                    new HashMap<String, String>(),
+                    0,
+                    stack.getParsedAwsAccessKey(envVars),
+                    stack.getParsedAwsSecretKey(envVars),
+                    stack.getAwsRegion(),
+                    false,
+                    envVars,
+                    stack.getIsPrefixSelected(),
+                    stack.getCapability()
+            );
+            if (cloudFormation.delete()) {
+                LOGGER.info("Success");
+            } else {
+                LOGGER.warning("Failed");
+                result = false;
+            }
+        }
+        return result;
+    }
 
-	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+    @Override
+    public BuildStepDescriptor getDescriptor() {
+        return DESCRIPTOR;
+    }
 
-		@Override
-		public String getDisplayName() {
-			return "Tear down Amazon CloudFormation";
-		}
+    @Extension
+    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
-		@Override
-		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-			return true;
-		}
-	}
-      
+    public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+
+        @Override
+        public String getDisplayName() {
+            return "Tear down Amazon CloudFormation";
+        }
+
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+            return true;
+        }
+    }
+
 }
 
