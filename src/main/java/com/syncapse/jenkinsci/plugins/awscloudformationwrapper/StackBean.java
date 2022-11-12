@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import hudson.util.Secret;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -57,7 +58,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 	/**
 	 * The secret key to call Amazon's APIs
 	 */
-	private String awsSecretKey;
+	private Secret awsSecretKey;
 
     /**
      * Whether or not the stack should be deleted automatically when the job completes
@@ -69,7 +70,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 	@DataBoundConstructor
 	public StackBean(String stackName, String description,
 			String cloudFormationRecipe, String parameters, long timeout,
-			String awsAccessKey, String awsSecretKey, boolean autoDeleteStack, Region awsRegion) {
+			String awsAccessKey, Secret awsSecretKey, boolean autoDeleteStack, Region awsRegion) {
 		super();
 		this.stackName = stackName;
 		this.description = description;
@@ -106,7 +107,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 		return awsAccessKey;
 	}
 
-	public String getAwsSecretKey() {
+	public Secret getAwsSecretKey() {
 		return awsSecretKey;
 	}
 
@@ -148,7 +149,7 @@ public class StackBean extends AbstractDescribableImpl<StackBean> {
 
 	
 	public String getParsedAwsSecretKey(EnvVars env) {
-		return env.expand(getAwsSecretKey());
+		return env.expand(getAwsSecretKey().getPlainText());
 	}
 
 	@Extension
