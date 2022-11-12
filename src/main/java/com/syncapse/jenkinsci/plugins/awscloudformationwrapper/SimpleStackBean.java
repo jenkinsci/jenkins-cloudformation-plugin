@@ -11,6 +11,7 @@ import hudson.util.ListBoxModel;
 
 import java.io.IOException;
 
+import hudson.util.Secret;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -36,7 +37,7 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 	/**
 	 * The secret key to call Amazon's APIs
 	 */
-	private String awsSecretKey;
+	private Secret awsSecretKey;
 
 	/**
 	 * The AWS Region to work against.
@@ -49,7 +50,7 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
  
 	@DataBoundConstructor
 	public SimpleStackBean(String stackName, String awsAccessKey,
-			String awsSecretKey, Region awsRegion,Boolean isPrefixSelected) {
+						   Secret awsSecretKey, Region awsRegion, Boolean isPrefixSelected) {
 		this.stackName = stackName;
 		this.awsAccessKey = awsAccessKey;
 		this.awsSecretKey = awsSecretKey;
@@ -67,7 +68,7 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 		return awsAccessKey;
 	}
 
-	public String getAwsSecretKey() {
+	public Secret getAwsSecretKey() {
 		return awsSecretKey;
 	}
        public Boolean getIsPrefixSelected() {
@@ -79,7 +80,7 @@ public class SimpleStackBean extends AbstractDescribableImpl<SimpleStackBean> {
 	}
 
 	public String getParsedAwsSecretKey(EnvVars env) {
-		return env.expand(getAwsSecretKey());
+		return env.expand(getAwsSecretKey().getPlainText());
 	}
 
 	public Region getAwsRegion() {
