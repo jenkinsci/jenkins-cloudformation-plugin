@@ -1,117 +1,117 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>4.48</version>
+    </parent>
 
-	<parent>
-		<groupId>org.jenkins-ci.plugins</groupId>
-		<artifactId>plugin</artifactId>
-		<version>4.48</version>
-	</parent>
+    <packaging>hpi</packaging>
 
-	<packaging>hpi</packaging>
+    <artifactId>jenkins-cloudformation-plugin</artifactId>
+    <version>${revision}${changelist}</version>
 
-	<artifactId>jenkins-cloudformation-plugin</artifactId>
-	<version>${revision}${changelist}</version>
+    <url>https://github.com/jenkinsci/jenkins-cloudformation-plugin</url>
 
-	<url>https://github.com/jenkinsci/jenkins-cloudformation-plugin</url>
+    <licenses>
+        <license>
+            <name>MIT license</name>
+            <comments>All source code is under the MIT license.</comments>
+        </license>
+    </licenses>
 
-	<licenses>
-		<license>
-			<name>MIT license</name>
-			<comments>All source code is under the MIT license.</comments>
-		</license>
-	</licenses>
+    <developers>
+        <developer>
+            <id>nathanagood</id>
+            <name>Nathan A. Good</name>
+            <email>nathan.a.good@gmail.com</email>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
 
-	<developers>
-		<developer>
-			<id>nathanagood</id>
-			<name>Nathan A. Good</name>
-			<email>nathan.a.good@gmail.com</email>
-			<timezone>-5</timezone>
-		</developer>
-	</developers>
+    <name>jenkins-cloudformation-plugin</name>
 
-	<name>jenkins-cloudformation-plugin</name>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.4.15</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-cloudformation</artifactId>
+            <version>1.12.338</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.8.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.13</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<version>4.4.15</version>
-		</dependency>
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-cloudformation</artifactId>
-			<version>1.12.338</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>1.8.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-all</artifactId>
-			<version>1.1</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.15</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>commons-codec</groupId>
-				<artifactId>commons-codec</artifactId>
-				<version>1.15</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <build>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
+        <testOutputDirectory>${project.build.directory}/test-classes</testOutputDirectory>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.3.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <additionalparam>-Xdoclint:none</additionalparam>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
-	<build>
-		<testSourceDirectory>src/test/java</testSourceDirectory>
-		<testOutputDirectory>${project.build.directory}/test-classes</testOutputDirectory>
-		<testResources>
-			<testResource>
-				<directory>src/test/resources</directory>
-			</testResource>
-		</testResources>
-		<pluginManagement>
-		  <plugins>
-		      <plugin>
-		          <groupId>org.apache.maven.plugins</groupId>
-		          <artifactId>maven-release-plugin</artifactId>
-		          <version>2.3.2</version>
-		      </plugin>
-              <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-javadoc-plugin</artifactId>
-                  <configuration>
-                      <additionalparam>-Xdoclint:none</additionalparam>
-                  </configuration>
-              </plugin>
-		  </plugins>
-		</pluginManagement>
-	</build>
-
-	<scm>
-		<connection>scm:git:git@github.com:${gitHubRepo}.git</connection>
-		<developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
-		<url>https://github.com/${gitHubRepo}</url>
-	  <tag>${scmTag}</tag>
-  </scm>
+    <scm>
+        <connection>scm:git:git@github.com:${gitHubRepo}.git</connection>
+        <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+        <url>https://github.com/${gitHubRepo}</url>
+        <tag>${scmTag}</tag>
+    </scm>
 
 
     <repositories>
@@ -128,11 +128,11 @@
         </pluginRepository>
     </pluginRepositories>
 
-	<properties>
-    <revision>1.4</revision>
-    <changelist>-SNAPSHOT</changelist>
-    <gitHubRepo>jenkinsci/jenkins-cloudformation-plugin</gitHubRepo>
-	   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <properties>
+        <revision>1.4</revision>
+        <changelist>-SNAPSHOT</changelist>
+        <gitHubRepo>jenkinsci/jenkins-cloudformation-plugin</gitHubRepo>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
 </project>
