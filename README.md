@@ -38,10 +38,12 @@ way you need.
 ### Using with Credentials Binding Plugin
 It is highly recommended to use this plugin together with [Credentials Binding Plugin](https://plugins.jenkins.io/credentials-binding).
 You can save your AWS IAM Credentials in Jenkins Credentials and then access them with Credentials Binding (see screenshot).
+
 ![](docs/images/credentials_binding.png)
 
 This makes your AWS credentials available as environmental variables.
 Now you can configure the CloudFormation plugin to use these env vars.
+
 ![](docs/images/env_vars.png)
 
 ## Vulnerabilities
