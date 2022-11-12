@@ -20,6 +20,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import hudson.util.Secret;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,9 +78,9 @@ public class CloudFormationBuildWrapperTest {
 	private void when_2_stack_are_entered() throws Exception {
 		List<StackBean> stackBeans = new ArrayList<StackBean>();
 		stackBeans.add(new StackBean("stack1", "stack description",
-				"{resources: }", "", 0, "accessKey", "secretKey", true, null));
+				"{resources: }", "", 0, "accessKey", Secret.fromString("secretKey"), true, null));
 		stackBeans.add(new StackBean("stack2", "stack2 description",
-				"{resources: }", "", 0, "accessKey", "secretKey", true, null));
+				"{resources: }", "", 0, "accessKey", Secret.fromString("secretKey"), true, null));
 
 		wrapper = spy(new CloudFormationBuildWrapper(stackBeans));
 
@@ -108,7 +109,7 @@ public class CloudFormationBuildWrapperTest {
 	private void when_1_stack_is_entered() throws Exception {
 		List<StackBean> stackBeans = new ArrayList<StackBean>();
 		stackBeans.add(new StackBean("stack1", "stack description",
-				"{resources: }", "", 0, "accessKey", "secretKey", true, null));
+				"{resources: }", "", 0, "accessKey", Secret.fromString("secretKey"), true, null));
 
 		wrapper = spy(new CloudFormationBuildWrapper(stackBeans));
 
