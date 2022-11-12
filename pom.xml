@@ -133,6 +133,7 @@
         <changelist>-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/jenkins-cloudformation-plugin</gitHubRepo>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.level>8</java.level>
     </properties>
 
 </project>
