@@ -158,9 +158,6 @@ public class CloudFormation {
         return autoDeleteStack;
     }
 
-    /**
-     * @return
-     */
     public boolean delete() {
         if (isPrefixSelected) {
             stackName = getOldestStackNameWithPrefix();
@@ -182,8 +179,6 @@ public class CloudFormation {
      * @throws TimeoutException if creating the stack takes longer than the
      * timeout value passed during creation.
      *
-     * @see CloudFormation#CloudFormation(PrintStream, String, String, Map,
-     * long, String, String)
      */
     public boolean create() throws TimeoutException, InterruptedException {
 
