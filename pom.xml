@@ -12,7 +12,7 @@
     <packaging>hpi</packaging>
 
     <artifactId>jenkins-cloudformation-plugin</artifactId>
-    <version>${revision}${changelist}</version>
+    <version>${changelist}</version>
 
     <url>https://github.com/jenkinsci/jenkins-cloudformation-plugin</url>
 
@@ -124,8 +124,7 @@
     </pluginRepositories>
 
     <properties>
-        <revision>1.4</revision>
-        <changelist>-SNAPSHOT</changelist>
+        <changelist>999999-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/jenkins-cloudformation-plugin</gitHubRepo>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
