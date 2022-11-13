@@ -46,15 +46,9 @@
             <version>4.4.15</version>
         </dependency>
         <dependency>
-            <groupId>com.amazonaws</groupId>
+            <groupId>org.jenkins-ci.plugins.aws-java-sdk</groupId>
             <artifactId>aws-java-sdk-cloudformation</artifactId>
-            <version>1.12.341</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>1.12.287-357.vf82d85a_6eefd</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
