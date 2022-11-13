@@ -41,11 +41,6 @@
             <version>4.5.13-1.0</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4.15</version>
-        </dependency>
-        <dependency>
             <groupId>org.jenkins-ci.plugins.aws-java-sdk</groupId>
             <artifactId>aws-java-sdk-cloudformation</artifactId>
             <version>1.12.287-357.vf82d85a_6eefd</version>
