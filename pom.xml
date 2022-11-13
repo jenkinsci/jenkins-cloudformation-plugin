@@ -32,7 +32,7 @@
         </developer>
     </developers>
 
-    <name>jenkins-cloudformation-plugin</name>
+    <name>CloudFormation plugin</name>
 
     <dependencies>
         <dependency>
