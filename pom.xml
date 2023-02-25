@@ -120,7 +120,7 @@
     </pluginRepositories>
 
     <properties>
-        <jenkins.version>2.332.4</jenkins.version>
+        <jenkins.version>2.361.4</jenkins.version>
         <changelist>999999-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/jenkins-cloudformation-plugin</gitHubRepo>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
