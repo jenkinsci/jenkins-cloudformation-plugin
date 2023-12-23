@@ -19,7 +19,6 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.retry.RetryUtils;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationAsyncClientBuilder;
-import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackEventsRequest;
@@ -54,7 +53,6 @@ import java.util.concurrent.TimeUnit;
 public class CloudFormation {
 
     private static final int COMPLETE_OPERATION_WAITING_TIME_MS = 10000;
-    private AmazonCloudFormationClient client;
     /**
      * Minimum time to wait before considering the creation of the stack a
      * failure. Default value is 5 minutes. (300 seconds)
@@ -488,31 +486,20 @@ public class CloudFormation {
     }
 
     private List<StackSummary> getAllRunningStacks() {
-        client = new AmazonCloudFormationClient(new AWSCredentials() {
-            public String getAWSAccessKeyId() {
-                return awsAccessKey;
-            }
-
-            public String getAWSSecretKey() {
-                return awsSecretKey;
-            }
-        });
         List<String> stackStatusFilters = new ArrayList<String>();
         stackStatusFilters.add("UPDATE_COMPLETE");
         stackStatusFilters.add("CREATE_COMPLETE");
         stackStatusFilters.add("ROLLBACK_COMPLETE");
         ListStacksRequest listStacksRequest = new ListStacksRequest();
         listStacksRequest.setStackStatusFilters(stackStatusFilters);
-        ListStacksResult result = client.listStacks(listStacksRequest);
-        List<StackSummary> stackSummaries = result.getStackSummaries();
-        return stackSummaries;
+        ListStacksResult result = amazonClient.listStacks(listStacksRequest);
+        return result.getStackSummaries();
     }
 
     public Map<String, String> getStackParameters(String stackName) {
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest();
         describeStacksRequest.setStackName(stackName);
-        DescribeStacksResult describeStacksResult = client
-                .describeStacks(describeStacksRequest);
+        DescribeStacksResult describeStacksResult = amazonClient.describeStacks(describeStacksRequest);
         List<Stack> stacks = describeStacksResult.getStacks();
         Stack stack = stacks.get(0);
         List<Parameter> parameters = stack.getParameters();
