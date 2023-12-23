@@ -265,9 +265,8 @@ public class CloudFormation {
            builder.withClientConfiguration(config);
         }
 
-        AmazonCloudFormation client = builder.build();
-        client.setEndpoint(this.awsRegion.endPoint);
-        return client;
+        builder.setRegion(this.awsRegion.awsRegion);
+        return builder.build();
     }
 
     private boolean waitForStackToBeDeleted() {
