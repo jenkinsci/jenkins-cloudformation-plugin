@@ -248,6 +248,7 @@ public class CloudFormation {
     protected AmazonCloudFormation getAWSClient() {
         AWSCredentials credentials = new BasicAWSCredentials(this.awsAccessKey,
                 this.awsSecretKey);
+        AWSCredentialsProvider provider = new BasicAWSCredentialsProvider(credentials);
         AmazonCloudFormation amazonClient;
         Hudson hudson = Hudson.getInstance();
         ProxyConfiguration proxyConfig = hudson != null ? hudson.proxy : null;
@@ -258,12 +259,9 @@ public class CloudFormation {
            config.setProxyUsername(proxyConfig.getUserName());
            config.setProxyPassword(proxyConfig.getPassword());
            config.setPreemptiveBasicProxyAuth(true);
-           AWSCredentialsProvider provider = new BasicAWSCredentialsProvider(credentials);
-           amazonClient = new AmazonCloudFormationAsyncClient(
-                   provider, config);
+           amazonClient = new AmazonCloudFormationAsyncClient(provider, config);
         } else {
-          amazonClient = new AmazonCloudFormationAsyncClient(
-                  credentials);
+          amazonClient = new AmazonCloudFormationAsyncClient(provider);
         }
         amazonClient.setEndpoint(awsRegion.endPoint);
         return amazonClient;
