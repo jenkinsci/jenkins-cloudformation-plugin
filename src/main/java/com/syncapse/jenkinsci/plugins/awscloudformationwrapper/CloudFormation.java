@@ -17,7 +17,7 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.retry.RetryUtils;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
-import com.amazonaws.services.cloudformation.AmazonCloudFormationAsyncClient;
+import com.amazonaws.services.cloudformation.AmazonCloudFormationAsyncClientBuilder;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
@@ -249,7 +249,9 @@ public class CloudFormation {
         AWSCredentials credentials = new BasicAWSCredentials(this.awsAccessKey,
                 this.awsSecretKey);
         AWSCredentialsProvider provider = new BasicAWSCredentialsProvider(credentials);
-        AmazonCloudFormation amazonClient;
+        AmazonCloudFormationAsyncClientBuilder builder = AmazonCloudFormationAsyncClientBuilder.standard();
+        builder.withCredentials(provider);
+
         Hudson hudson = Hudson.getInstance();
         ProxyConfiguration proxyConfig = hudson != null ? hudson.proxy : null;
         if (proxyConfig != null && proxyConfig.name != null) {
@@ -259,12 +261,9 @@ public class CloudFormation {
            config.setProxyUsername(proxyConfig.getUserName());
            config.setProxyPassword(proxyConfig.getPassword());
            config.setPreemptiveBasicProxyAuth(true);
-           amazonClient = new AmazonCloudFormationAsyncClient(provider, config);
-        } else {
-          amazonClient = new AmazonCloudFormationAsyncClient(provider);
+           builder.withClientConfiguration(config);
         }
-        amazonClient.setEndpoint(awsRegion.endPoint);
-        return amazonClient;
+        return builder.build();
     }
 
     private boolean waitForStackToBeDeleted() {
