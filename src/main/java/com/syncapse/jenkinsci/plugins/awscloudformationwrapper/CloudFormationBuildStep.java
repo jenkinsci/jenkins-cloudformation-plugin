@@ -46,7 +46,7 @@ public class CloudFormationBuildStep extends Builder{
 
 
 	public BuildStepMonitor getRequiredMonitorService() {
-		return BuildStepMonitor.BUILD;
+		return BuildStepMonitor.NONE;
 	}
 
 	@Override
