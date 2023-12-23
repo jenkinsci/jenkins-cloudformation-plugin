@@ -264,7 +264,10 @@ public class CloudFormation {
            config.setPreemptiveBasicProxyAuth(true);
            builder.withClientConfiguration(config);
         }
-        return builder.build();
+
+        AmazonCloudFormation client = builder.build();
+        client.setEndpoint(this.awsRegion.endPoint);
+        return client;
     }
 
     private boolean waitForStackToBeDeleted() {
