@@ -14,6 +14,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.retry.RetryUtils;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
@@ -248,7 +249,7 @@ public class CloudFormation {
     protected AmazonCloudFormation getAWSClient() {
         AWSCredentials credentials = new BasicAWSCredentials(this.awsAccessKey,
                 this.awsSecretKey);
-        AWSCredentialsProvider provider = new BasicAWSCredentialsProvider(credentials);
+        AWSCredentialsProvider provider = new AWSStaticCredentialsProvider(credentials);
         AmazonCloudFormationAsyncClientBuilder builder = AmazonCloudFormationAsyncClientBuilder.standard();
         builder.withCredentials(provider);
 
@@ -529,22 +530,4 @@ public class CloudFormation {
         }
         return false;
     }
-}
-
-class BasicAWSCredentialsProvider implements AWSCredentialsProvider {
-
-   AWSCredentials awsCredentials;
-
-   public BasicAWSCredentialsProvider(AWSCredentials awsCredentials) {
-       this.awsCredentials = awsCredentials;
-   }
-
-   public AWSCredentials getCredentials() {
-       return awsCredentials;
-   }
-
-   public void refresh() {
-
-   }
-
 }
