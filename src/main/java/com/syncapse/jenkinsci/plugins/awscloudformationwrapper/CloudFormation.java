@@ -103,7 +103,7 @@ public class CloudFormation {
         this.awsSecretKey = awsSecretKey;
         this.awsRegion = region != null ? region : Region.getDefault();
         this.isPrefixSelected = isPrefixSelected;
-        
+
         if (timeout == -12345) {
             this.timeout = 0; // Faster testing.
         } else {
@@ -112,7 +112,7 @@ public class CloudFormation {
         this.amazonClient = getAWSClient();
         this.autoDeleteStack = autoDeleteStack;
         this.envVars = envVars;
-    
+
     }
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters,
@@ -137,7 +137,7 @@ public class CloudFormation {
         this.autoDeleteStack = false;
         this.envVars = envVars;
         this.sleep=sleep;
-    
+
     }
     public CloudFormation(PrintStream logger, String stackName, Boolean isRecipeURL,
             String recipeBody, Map<String, String> parameters, long timeout,
@@ -248,7 +248,8 @@ public class CloudFormation {
     protected AmazonCloudFormation getAWSClient() {
         AWSCredentials credentials = new BasicAWSCredentials(this.awsAccessKey,
                 this.awsSecretKey);
-        Hudson hudson = Hudson.getInstance(); 
+        AmazonCloudFormation amazonClient;
+        Hudson hudson = Hudson.getInstance();
         ProxyConfiguration proxyConfig = hudson != null ? hudson.proxy : null;
         if (proxyConfig != null && proxyConfig.name != null) {
            ClientConfiguration config = new ClientConfiguration();
@@ -258,17 +259,14 @@ public class CloudFormation {
            config.setProxyPassword(proxyConfig.getPassword());
            config.setPreemptiveBasicProxyAuth(true);
            AWSCredentialsProvider provider = new BasicAWSCredentialsProvider(credentials);
-           AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
+           amazonClient = new AmazonCloudFormationAsyncClient(
                    provider, config);
-   
-           amazonClient.setEndpoint(awsRegion.endPoint);
-           return amazonClient;
         } else {
-          AmazonCloudFormation amazonClient = new AmazonCloudFormationAsyncClient(
+          amazonClient = new AmazonCloudFormationAsyncClient(
                   credentials);
-          amazonClient.setEndpoint(awsRegion.endPoint);
-          return amazonClient;
         }
+        amazonClient.setEndpoint(awsRegion.endPoint);
+        return amazonClient;
     }
 
     private boolean waitForStackToBeDeleted() {
@@ -294,7 +292,7 @@ public class CloudFormation {
               }
 
               logger.println("Stack status " + stackStatus + ".");
-              
+
             } catch (AmazonServiceException ase) {
                 if (!RetryUtils.isThrottlingException(ase)) {
                     throw ase;
@@ -447,7 +445,7 @@ public class CloudFormation {
 
         return r;
 	}
-	
+
     public Map<String, String> getOutputs() {
         // Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
         HashMap<String, String> map = new HashMap<String, String>();
@@ -485,7 +483,7 @@ public class CloudFormation {
                 stackToDelete = summary.getStackName();
             }
         }
-        
+
         return stackToDelete;
     }
 
@@ -537,19 +535,19 @@ public class CloudFormation {
 }
 
 class BasicAWSCredentialsProvider implements AWSCredentialsProvider {
-   
+
    AWSCredentials awsCredentials;
-   
+
    public BasicAWSCredentialsProvider(AWSCredentials awsCredentials) {
        this.awsCredentials = awsCredentials;
    }
-   
+
    public AWSCredentials getCredentials() {
        return awsCredentials;
    }
-   
+
    public void refresh() {
-       
+
    }
-   
+
 }
