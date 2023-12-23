@@ -1,0 +1,12 @@
+{
+  "Resources": {
+    "EC2SG15C91": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupName": "test-group",
+        "VpcId": "vpc-054b257d",
+        "GroupDescription": "test group for tests"
+      }
+    }
+  }
+}
