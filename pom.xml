@@ -38,7 +38,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.aws-java-sdk</groupId>
             <artifactId>aws-java-sdk-cloudformation</artifactId>
-            <version>1.12.610-428.v849169a_01b_a_5</version>
+            <version>1.12.633-430.vf9a_e567a_244f</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
