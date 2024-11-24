@@ -299,6 +299,7 @@ public class CloudFormation {
             }
             sleep(stack, throttled);
         }
+        logger.println("Stack status " + status + " in " + ((subTime - startTime) / 1000) + " seconds");
         return StackStatus.DELETE_COMPLETE == status;
     }
 
@@ -356,6 +357,7 @@ public class CloudFormation {
                 sleep(stack, throttled);
             }
         }
+        logger.println("Stack status " + status + " in " + ((subTime - startTime) / 1000) + " seconds");
 
         printStackEvents();
 
