@@ -45,7 +45,7 @@ public class CloudFormationPostBuildNotifier extends Notifier{
 
 
 	public BuildStepMonitor getRequiredMonitorService() {
-		return BuildStepMonitor.BUILD;
+		return BuildStepMonitor.NONE;
 	}
 
 	@Override
